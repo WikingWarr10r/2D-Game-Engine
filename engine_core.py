@@ -10,6 +10,7 @@ class EngineCore:
         self.looping = True
         
         self.objects = []
+        self.ui = []
 
         self.gravity = 10
         self.bounciness = 0.7
@@ -25,6 +26,9 @@ class EngineCore:
         for obj in self.objects:
             obj.render(self.screen)
 
+        for ui in self.ui:
+            ui.render(self.screen)
+
     def main_loop(self):
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
@@ -34,6 +38,9 @@ class EngineCore:
         for obj in self.objects:
             obj.update(self.gravity, self.bounciness, self.air_resistance, self.friction)
             
+        for ui in self.ui:
+            ui.update()
+
         for i in range(len(self.objects)):
             for j in range(i+1, len(self.objects)):
                 a = self.objects[i]
