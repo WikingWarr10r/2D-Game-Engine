@@ -9,6 +9,7 @@ engine.add_object(vec2(50, 450), vec2(600, 50))
 engine.add_object(vec2(50, 400), vec2(900, 50))
 
 ui = UIObject("Position Editor", vec2(100, 100), 300, 200, engine)
+ui.add_number(0)
 
 while engine.looping:
     engine.main_loop()
