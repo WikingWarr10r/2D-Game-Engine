@@ -34,6 +34,8 @@ class EngineCore:
             if event.type == pygame.QUIT:
                 pygame.quit()
                 raise SystemExit
+            for ui in self.ui:
+                ui.handle_event(event)
         
         for obj in self.objects:
             obj.update(self.gravity, self.bounciness, self.air_resistance, self.friction)
