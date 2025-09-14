@@ -26,8 +26,11 @@ class EngineCore:
 
         self.process = psutil.Process(os.getpid())
 
+        self.setup_screen()
+
     def setup_screen(self, width=1280, height=720):
         self.screen = pygame.display.set_mode((width,height))
+        pygame.display.set_caption("Engine")
         
     def draw_circle(self, radius, pos:vec2, colour=(255, 255, 255, 122)):
         self.draw_calls.append(lambda: pygame.draw.circle(self.screen, colour, pos, radius))
