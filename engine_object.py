@@ -64,8 +64,9 @@ class Object:
             self.pos.x = 1230
             self.vel.x *= -1
     
-    def update(self, gravity, bounciness, air_resistance, friction, floor):
-        dt = 1/60
+    def update(self, gravity, bounciness, air_resistance, friction, floor, dt):
+        if dt == 0:
+            return
         self.pos = self.pos + (self.vel * vec2(dt, dt))
         self.vel = self.vel + (vec2(0, gravity))
         self.vel.x = self.vel.x * air_resistance

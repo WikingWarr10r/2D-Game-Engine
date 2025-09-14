@@ -21,6 +21,7 @@ class EngineCore:
         self.air_resistance = 0.999
         self.friction = 0.8
         self.floor = 600
+        self.dt = 1/60
 
         self.draw_calls = []
 
@@ -62,7 +63,7 @@ class EngineCore:
                 ui.handle_event(event)
         
         for obj in self.objects:
-            obj.update(self.gravity, self.bounciness, self.air_resistance, self.friction, self.floor)
+            obj.update(self.gravity, self.bounciness, self.air_resistance, self.friction, self.floor, self.dt)
             
         for ui in self.ui:
             ui.update()

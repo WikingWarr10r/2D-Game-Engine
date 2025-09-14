@@ -1,3 +1,5 @@
+from fractions import Fraction
+
 class vec2:
     def __init__(self, x, y):
         self.x = x
@@ -20,3 +22,15 @@ class vec2:
     
     def __repr__(self):
         return f"{self.x}, {self.y}"
+    
+def decimal_to_fraction(decimal_str):
+    return Fraction(decimal_str).limit_denominator()
+
+def smart_number(decimal_str):
+    frac = Fraction(decimal_str).limit_denominator()
+    dec = str(float(decimal_str))
+    
+    if len(str(frac)) < len(dec):
+        return frac
+    else:
+        return dec
