@@ -1,5 +1,5 @@
 from engine_core import *
-from engine_ui import *
+from physics_ui import PhysicsUI
 
 engine = EngineCore()
 
