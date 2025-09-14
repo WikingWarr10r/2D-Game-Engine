@@ -94,6 +94,72 @@ class UILabel:
     def handle_event(self, event):
         pass
 
+    def get_value(self):
+        return self.label
+
+    def set_value(self, val):
+        self.label = str(val)
+
+class UIVec2:
+    def __init__(self, value, pos, label, font):
+        self.value = value
+        self.pos = pos
+        self.label = label
+        self.font = font
+        self.width = 120
+        self.height = 20
+
+        self.box_width = 50
+        self.box_height = 20
+
+        self.spacing = 5
+
+    def render(self, screen):
+        x_start = self.pos.x
+
+        text_x_label = self.font.render("x:", True, (255, 255, 255))
+        screen.blit(text_x_label, (x_start, self.pos.y + (self.box_height - text_x_label.get_height()) / 2))
+        x_start += text_x_label.get_width() + 2
+
+        rect_x = pygame.Rect(x_start, self.pos.y, self.box_width, self.box_height)
+        pygame.draw.rect(screen, (150, 30, 30), rect_x, border_radius=3)
+        text_x = self.font.render(str(self.value.x), True, (255, 255, 255))
+        screen.blit(text_x, (x_start + (self.box_width - text_x.get_width()) / 2, self.pos.y + (self.box_height - text_x.get_height()) / 2))
+        x_start += self.box_width + self.spacing
+
+        text_y_label = self.font.render("y:", True, (255, 255, 255))
+        screen.blit(text_y_label, (x_start, self.pos.y + (self.box_height - text_y_label.get_height()) / 2))
+        x_start += text_y_label.get_width() + 2
+
+        rect_y = pygame.Rect(x_start, self.pos.y, self.box_width, self.box_height)
+        pygame.draw.rect(screen, (150, 30, 30), rect_y, border_radius=3)
+        text_y = self.font.render(str(self.value.y), True, (255, 255, 255))
+        screen.blit(text_y, (x_start + (self.box_width - text_y.get_width()) / 2, self.pos.y + (self.box_height - text_y.get_height()) / 2))
+        x_start += self.box_width + self.spacing
+
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEWHEEL:
+            mouse_pos = vec2(*pygame.mouse.get_pos())
+            x_start = self.pos.x
+            text_x_label = self.font.render("x:", True, (255, 255, 255))
+            x_start += text_x_label.get_width() + 2
+
+            if (x_start <= mouse_pos.x <= x_start + self.box_width and self.pos.y <= mouse_pos.y <= self.pos.y + self.box_height):
+                self.value.x += event.y
+            x_start += self.box_width + self.spacing
+
+            text_y_label = self.font.render("y:", True, (255, 255, 255))
+            x_start += text_y_label.get_width() + 2
+
+            if (x_start <= mouse_pos.x <= x_start + self.box_width and self.pos.y <= mouse_pos.y <= self.pos.y + self.box_height):
+                self.value.y += event.y
+
+    def get_value(self):
+        return self.value
+
+    def set_value(self, val):
+        self.value = val
+
 class UIObject:
     def __init__(self, title, pos, width, height, engine):
         self.title = title
@@ -124,15 +190,25 @@ class UIObject:
         spacer = UISpacer(vec2(0, 0))
         self.elements.append(spacer)
 
-    def add_label(self, label):
-        lab = UILabel(vec2(0,0), label, self.font)
+    def add_label(self, text, id=None):
+        lab = UILabel(vec2(0,0), text, self.font)
         self.elements.append(lab)
-        self.lookup[label] = lab
+        if id:
+            self.lookup[id] = lab
+
+    def add_vec2(self, val: vec2, label):
+        vec = UIVec2(val, vec2(0, 0), label, self.font)
+        self.elements.append(vec)
+        self.lookup[label] = vec
 
     def get_value(self, label):
         if label in self.lookup:
             return self.lookup[label].get_value()
         return None
+    
+    def set_value(self, label, val):
+        if label in self.lookup:
+            self.lookup[label].set_value(val)
 
     def handle_event(self, event):
         for elem in self.elements:

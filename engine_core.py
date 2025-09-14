@@ -1,4 +1,8 @@
 import pygame
+import time
+import psutil
+import os
+from collections import deque
 
 from engine_math import *
 from engine_object import *
@@ -19,6 +23,8 @@ class EngineCore:
         self.floor = 600
 
         self.draw_calls = []
+
+        self.process = psutil.Process(os.getpid())
 
     def setup_screen(self, width=1280, height=720):
         self.screen = pygame.display.set_mode((width,height))
