@@ -2,9 +2,10 @@ import pygame
 from engine_math import *
 
 class UINumber:
-    def __init__(self, value, pos, font):
+    def __init__(self, value, pos, label, font):
         self.value = value
         self.pos = pos
+        self.label = label
         self.font = font
         self.width = 50
         self.height = 20
@@ -15,6 +16,9 @@ class UINumber:
 
         text_surf = self.font.render(str(self.value), True, (255, 255, 255))
         screen.blit(text_surf, (self.pos.x + 5, self.pos.y + (self.height - text_surf.get_height()) / 2))
+
+        text_surf = self.font.render(self.label, True, (255, 255, 255))
+        screen.blit(text_surf, (self.pos.x + 5 + self.width, self.pos.y + (self.height - text_surf.get_height()) / 2))
     
     def handle_event(self, event):
         if event.type == pygame.MOUSEWHEEL:
@@ -43,9 +47,12 @@ class UIObject:
 
         self.font = pygame.font.Font("font/ProggyClean.ttf", 16)
 
-    def add_number(self, val):
-        num = UINumber(val, vec2(0, 0), self.font)
+    def add_number(self, val, label):
+        num = UINumber(val, vec2(0, 0), label, self.font)
         self.numbers.append(num)
+
+    def get_number(self, index):
+        return self.numbers[index].get_value()
 
     def handle_event(self, event):
         for num in self.numbers:
