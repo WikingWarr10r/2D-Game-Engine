@@ -64,12 +64,12 @@ class Object:
             self.pos.x = 1230
             self.vel.x *= -1
     
-    def update(self, gravity, bounciness, air_resistance, friction):
+    def update(self, gravity, bounciness, air_resistance, friction, floor):
         dt = 1/60
         self.pos = self.pos + (self.vel * vec2(dt, dt))
         self.vel = self.vel + (vec2(0, gravity))
         self.vel.x = self.vel.x * air_resistance
-        self.collide(600, bounciness, friction)
+        self.collide(floor, bounciness, friction)
         
     def render(self, screen):
         pygame.draw.circle(screen, "white", (self.pos.x, self.pos.y), self.radius)

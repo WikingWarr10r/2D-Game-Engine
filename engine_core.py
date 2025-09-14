@@ -16,13 +16,16 @@ class EngineCore:
         self.bounciness = 0.7
         self.air_resistance = 0.999
         self.friction = 0.8
+        self.floor = 600
 
     def setup_screen(self, width=1280, height=720):
         self.screen = pygame.display.set_mode((width,height))
         
     def render(self):
         self.screen.fill("black")
-        
+        pygame.draw.line(self.screen, "white", (0, self.floor+15), (1280, self.floor+15), 5)
+
+
         for obj in self.objects:
             obj.render(self.screen)
 
@@ -38,7 +41,7 @@ class EngineCore:
                 ui.handle_event(event)
         
         for obj in self.objects:
-            obj.update(self.gravity, self.bounciness, self.air_resistance, self.friction)
+            obj.update(self.gravity, self.bounciness, self.air_resistance, self.friction, self.floor)
             
         for ui in self.ui:
             ui.update()
