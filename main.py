@@ -18,6 +18,7 @@ ui.add_label("Position:")
 ui.add_vec2(vec2(0, 0), "Position")
 ui.add_spacer()
 ui.add_button(False, "Add New Object", True)
+ui.add_button(False, "Mouse Mode", False)
 ui.add_spacer()
 
 ui.add_label("Engine Statistics:")
@@ -32,6 +33,9 @@ while engine.looping:
     engine.floor = ui.get_value("Floor Height")
     engine.gravity = ui.get_value("Gravity")
 
+    if ui.get_value("Mouse Mode"):
+        ui.set_value("Position", vec2(*pygame.mouse.get_pos()))
+
     position = ui.get_value("Position")
     engine.draw_cross(position)
 
@@ -40,9 +44,6 @@ while engine.looping:
 
     engine.main_loop()
 
-    fps = 1/(time.time()-start)
-    mem = engine.process.memory_info().rss / 1024**2
-
-    ui.set_value("fps", f"FPS: {int(fps)}")
+    ui.set_value("fps", f"FPS: {int(1/(time.time()-start))}")
     ui.set_value("num_objects", f"Number Of Objects: {len(engine.objects)}")
-    ui.set_value("mem", f"Memory Usage: {mem:.2f}MB")
+    ui.set_value("mem", f"Memory Usage: {engine.process.memory_info().rss / 1024**2:.2f}MB")
