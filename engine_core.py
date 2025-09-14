@@ -18,16 +18,28 @@ class EngineCore:
         self.friction = 0.8
         self.floor = 600
 
+        self.draw_calls = []
+
     def setup_screen(self, width=1280, height=720):
         self.screen = pygame.display.set_mode((width,height))
         
+    def draw_circle(self, radius, pos:vec2, colour=(255, 255, 255, 122)):
+        self.draw_calls.append(lambda: pygame.draw.circle(self.screen, colour, pos, radius))
+    
+    def draw_cross(self, centre, colour=(255, 255, 255, 122)):
+        self.draw_calls.append(lambda: pygame.draw.line(self.screen, colour, (centre.x - 10, centre.y), (centre.x + 10, centre.y)))
+        self.draw_calls.append(lambda: pygame.draw.line(self.screen, colour, (centre.x, centre.y - 10), (centre.x, centre.y + 10)))
+
     def render(self):
         self.screen.fill("black")
         pygame.draw.line(self.screen, "white", (0, self.floor+15), (1280, self.floor+15), 5)
 
-
         for obj in self.objects:
             obj.render(self.screen)
+
+        for draw_call in self.draw_calls:
+            draw_call()
+        self.draw_calls.clear()
 
         for ui in self.ui:
             ui.render(self.screen)
