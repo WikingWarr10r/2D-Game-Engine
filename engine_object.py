@@ -5,10 +5,12 @@ class Object:
     def __init__(self, pos: vec2, vel: vec2, radius):
         self.pos = pos
         self.vel = vel
+
+        self.density = 0.0014147106
         
-        self.mass = 1
         self.radius = radius
-        
+        self.mass = (pi * radius * radius) * self.density
+
     def check_collision(self, other):
         distance = ((self.pos.x - other.pos.x) ** 2 + (self.pos.y - other.pos.y) ** 2) ** 0.5
         return distance < (self.radius + other.radius)
@@ -57,12 +59,15 @@ class Object:
             self.pos.y = lower-self.radius
             self.vel.y = -self.vel.y*bounciness
             self.vel.x *= friction
-        if self.pos.x < 0:
-            self.pos.x = 0
+        if self.pos.x < 0 + self.radius:
+            self.pos.x = 0 + self.radius
             self.vel.x *= -1
-        if self.pos.x > 1280:
-            self.pos.x = 1280
+        if self.pos.x > 1280 - self.radius:
+            self.pos.x = 1280 - self.radius
             self.vel.x *= -1
+
+    def add_force(self, vec):
+        self.vel += vec
     
     def update(self, gravity, bounciness, air_resistance, friction, floor, dt):
         if dt == 0:

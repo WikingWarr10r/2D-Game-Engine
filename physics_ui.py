@@ -59,6 +59,10 @@ class PhysicsUI:
             self.ui.set_value("Position", mouse_pos)
             if pygame.mouse.get_pressed()[0] and not ui_rect.collidepoint(mouse_pos.x, mouse_pos.y):
                 self.engine.add_object(position, velocity, radius)
+            if pygame.mouse.get_pressed()[2]:
+                for obj in self.engine.objects:
+                    length = (mouse_pos - obj.pos).length()
+                    obj.add_force(((mouse_pos - obj.pos) / vec2(length, length)) * 50)
 
         if self.ui.get_value("Add New Object"):
             self.engine.add_object(position, velocity, radius)

@@ -71,8 +71,14 @@ class UIObject:
     def render(self, screen):
         self.height = 20 + len(self.elements) * 25
 
-        pygame.draw.rect(screen, (30, 30, 30,), (self.pos.x, self.pos.y, self.width, self.height), border_radius=5)
-        pygame.draw.rect(screen, (150, 30, 30), (self.pos.x, self.pos.y, self.width, 15), border_radius=5)
+        surf = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
+
+        pygame.draw.rect(surf, (30, 30, 30, 200), (0, 0, self.width, self.height), border_radius=5)
+
+        pygame.draw.rect(surf, (150, 30, 30, 200), (0, 0, self.width, 15), border_radius=5)
+
+        screen.blit(surf, (self.pos.x, self.pos.y))
+
         title_surf = self.font.render(self.title, True, (255, 255, 255))
         screen.blit(title_surf, (self.pos.x + 5, self.pos.y + (15 - title_surf.get_height()) / 2))
 
