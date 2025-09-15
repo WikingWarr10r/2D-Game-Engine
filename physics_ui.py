@@ -15,6 +15,7 @@ class PhysicsUI:
         self.ui.add_vec2(vec2(0, 0), "Position")
         self.ui.add_label("Spawn Velocity:")
         self.ui.add_vec2(vec2(0, 0), "Velocity")
+        self.ui.add_number(15, "Object Radius", [1, "inf"])
         self.ui.add_spacer()
         self.ui.add_button(False, "Add New Object", True)
         self.ui.add_button(False, "Mouse Mode", False)
@@ -49,6 +50,7 @@ class PhysicsUI:
     def object_spawning(self):
         position = self.ui.get_value("Position")
         velocity = self.ui.get_value("Velocity")
+        radius = self.ui.get_value("Object Radius")
         mouse_pos = vec2(*pygame.mouse.get_pos())
         
         ui_rect = pygame.Rect(self.ui.pos.x, self.ui.pos.y, self.ui.width, self.ui.height)
@@ -56,10 +58,10 @@ class PhysicsUI:
         if self.ui.get_value("Mouse Mode"):
             self.ui.set_value("Position", mouse_pos)
             if pygame.mouse.get_pressed()[0] and not ui_rect.collidepoint(mouse_pos.x, mouse_pos.y):
-                self.engine.add_object(position, velocity)
+                self.engine.add_object(position, velocity, radius)
 
         if self.ui.get_value("Add New Object"):
-            self.engine.add_object(position, velocity)
+            self.engine.add_object(position, velocity, radius)
 
         self.engine.draw_cross(position)
         self.engine.draw_line(position, position + (velocity/vec2(10, 10)), (255, 0, 0, 122))

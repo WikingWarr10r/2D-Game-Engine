@@ -45,7 +45,7 @@ class EngineCore:
 
     def render(self):
         self.screen.fill("black")
-        pygame.draw.line(self.screen, "white", (0, self.floor+15), (1280, self.floor+15), 5)
+        pygame.draw.line(self.screen, "white", (0, self.floor), (1280, self.floor), 5)
 
         for obj in self.objects:
             obj.render(self.screen)
@@ -84,5 +84,5 @@ class EngineCore:
         pygame.display.flip()
         self.clock.tick(60)
     
-    def add_object(self, pos: vec2, vel: vec2):
-        self.objects.append(Object(pos, vel))
+    def add_object(self, pos: vec2, vel: vec2, radius):
+        self.objects.append(Object(pos, vel, radius))

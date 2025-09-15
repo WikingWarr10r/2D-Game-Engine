@@ -2,12 +2,12 @@ import pygame
 from engine_math import *
 
 class Object:
-    def __init__(self, pos: vec2, vel: vec2):
+    def __init__(self, pos: vec2, vel: vec2, radius):
         self.pos = pos
         self.vel = vel
         
         self.mass = 1
-        self.radius = 15
+        self.radius = radius
         
     def check_collision(self, other):
         distance = ((self.pos.x - other.pos.x) ** 2 + (self.pos.y - other.pos.y) ** 2) ** 0.5
@@ -53,15 +53,15 @@ class Object:
         other.vel = other.vel + impulse * (1 / other.mass)   
 
     def collide(self, lower, bounciness, friction):
-        if self.pos.y > lower:
-            self.pos.y = lower
+        if self.pos.y > lower-self.radius:
+            self.pos.y = lower-self.radius
             self.vel.y = -self.vel.y*bounciness
             self.vel.x *= friction
-        if self.pos.x < 50:
-            self.pos.x = 50
+        if self.pos.x < 0:
+            self.pos.x = 0
             self.vel.x *= -1
-        if self.pos.x > 1230:
-            self.pos.x = 1230
+        if self.pos.x > 1280:
+            self.pos.x = 1280
             self.vel.x *= -1
     
     def update(self, gravity, bounciness, air_resistance, friction, floor, dt):
