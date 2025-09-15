@@ -68,7 +68,7 @@ class Object:
         if dt == 0:
             return
         self.pos = self.pos + (self.vel * vec2(dt, dt))
-        self.vel = self.vel + (vec2(0, gravity))
+        self.vel = self.vel + (vec2(0, gravity * (dt*60)))
         self.vel.x = self.vel.x * air_resistance
         self.collide(floor, bounciness, friction)
         

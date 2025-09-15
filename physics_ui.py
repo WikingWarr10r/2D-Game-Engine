@@ -13,6 +13,8 @@ class PhysicsUI:
 
         self.ui.add_label("Spawn Position:")
         self.ui.add_vec2(vec2(0, 0), "Position")
+        self.ui.add_label("Spawn Velocity:")
+        self.ui.add_vec2(vec2(0, 0), "Velocity")
         self.ui.add_spacer()
         self.ui.add_button(False, "Add New Object", True)
         self.ui.add_button(False, "Mouse Mode", False)
@@ -21,6 +23,7 @@ class PhysicsUI:
         self.ui.add_label("Simulation:")
         self.ui.add_button(False, "Pause Simulation", False)
         self.ui.add_button(False, "Clear Objects", True)
+        self.ui.add_number(1, "Delta Time Divisor", [1, "inf"])
         self.ui.add_spacer()
 
         self.ui.add_label("Engine Statistics:")
@@ -38,11 +41,14 @@ class PhysicsUI:
         else:
             self.engine.dt = 1/60
 
+        self.engine.dt /= self.ui.get_value("Delta Time Divisor")
+
         if self.ui.get_value("Clear Objects"):
             self.engine.objects = []
 
     def object_spawning(self):
         position = self.ui.get_value("Position")
+        velocity = self.ui.get_value("Velocity")
         mouse_pos = vec2(*pygame.mouse.get_pos())
         
         ui_rect = pygame.Rect(self.ui.pos.x, self.ui.pos.y, self.ui.width, self.ui.height)
@@ -50,12 +56,13 @@ class PhysicsUI:
         if self.ui.get_value("Mouse Mode"):
             self.ui.set_value("Position", mouse_pos)
             if pygame.mouse.get_pressed()[0] and not ui_rect.collidepoint(mouse_pos.x, mouse_pos.y):
-                self.engine.add_object(position, vec2(0, 0))
+                self.engine.add_object(position, velocity)
 
         if self.ui.get_value("Add New Object"):
-            self.engine.add_object(position, vec2(0, 0))
+            self.engine.add_object(position, velocity)
 
         self.engine.draw_cross(position)
+        self.engine.draw_line(position, position + (velocity/vec2(10, 10)), (255, 0, 0, 122))
     
     def update_stats(self, start):
         self.ui.set_value("fps", f"FPS: {int(1/(time.time()-start))}")

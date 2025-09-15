@@ -40,6 +40,9 @@ class EngineCore:
         self.draw_calls.append(lambda: pygame.draw.line(self.screen, colour, (centre.x - 10, centre.y), (centre.x + 10, centre.y)))
         self.draw_calls.append(lambda: pygame.draw.line(self.screen, colour, (centre.x, centre.y - 10), (centre.x, centre.y + 10)))
 
+    def draw_line(self, start, end, colour=(255, 255, 255, 122)):
+        self.draw_calls.append(lambda: pygame.draw.line(self.screen, colour, (start.x, start.y), (end.x, end.y)))
+
     def render(self):
         self.screen.fill("black")
         pygame.draw.line(self.screen, "white", (0, self.floor+15), (1280, self.floor+15), 5)

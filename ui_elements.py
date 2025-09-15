@@ -1,14 +1,22 @@
 import pygame
+import sys
 from engine_math import *
 
 class UINumber:
-    def __init__(self, value, pos, label, font):
+    def __init__(self, value, pos, label, font, bounds=None):
         self.value = value
         self.pos = pos
         self.label = label
         self.font = font
         self.width = 50
         self.height = 20
+        if not bounds == None:
+            bnds = bounds
+            if bounds[0] == "-inf":
+                bnds[0] = -sys.maxsize
+            if bounds[1] == "inf":
+                bnds[1] = sys.maxsize
+            self.bounds = bnds
 
     def render(self, screen):
         rect = pygame.Rect(self.pos.x, self.pos.y, self.width, self.height)
@@ -26,8 +34,17 @@ class UINumber:
             if (self.pos.x <= mouse_pos.x <= self.pos.x + self.width and self.pos.y <= mouse_pos.y <= self.pos.y + self.height):
                 self.value += event.y
 
+                if self.value < self.bounds[0]:
+                    self.value = self.bounds[0]
+                if self.value > self.bounds[1]:
+                    self.value = self.bounds[1]
+
+
+
     def set_value(self, val):
         self.value = val
+        if not self.bounds == None:
+            self.value = min(max(self.value, self.bounds[0]), self.bounds[1])
 
     def get_value(self):
         return self.value

@@ -16,8 +16,8 @@ class UIObject:
 
         self.font = pygame.font.Font("font/ProggyClean.ttf", 16)
 
-    def add_number(self, val: int, label):
-        num = UINumber(val, vec2(0, 0), label, self.font)
+    def add_number(self, val: int, label, bounds=None):
+        num = UINumber(val, vec2(0, 0), label, self.font, bounds)
         self.elements.append(num)
         self.lookup[label] = num
 
