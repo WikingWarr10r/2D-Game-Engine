@@ -69,13 +69,18 @@ class Object:
     def add_force(self, vec):
         self.vel += vec
     
-    def update(self, gravity, bounciness, air_resistance, friction, floor, dt):
-        if dt == 0:
-            return
-        self.pos = self.pos + (self.vel * vec2(dt, dt))
-        self.vel = self.vel + (vec2(0, gravity * (dt*60)))
-        self.vel.x = self.vel.x * air_resistance
-        self.collide(floor, bounciness, friction)
+    def update(self, gravity, bounciness, air_resistance, friction, floor, dt, simulation_type):
+        if simulation_type == "Basic":
+            if dt == 0:
+                return
+            self.pos = self.pos + (self.vel * vec2(dt, dt))
+            self.vel = self.vel + (vec2(0, gravity * (dt*60)))
+            self.vel.x = self.vel.x * air_resistance
+            self.collide(floor, bounciness, friction)
         
+        elif simulation_type == "Newtonian Gravity":
+            self.pos = self.pos + (self.vel * vec2(dt, dt))
+
+            
     def render(self, screen):
         pygame.draw.circle(screen, "white", (self.pos.x, self.pos.y), self.radius)

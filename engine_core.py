@@ -22,6 +22,9 @@ class EngineCore:
         self.friction = 0.8
         self.floor = 600
         self.dt = 1/60
+        self.gravitational_constant = -10000
+
+        self.sim_type = "Newtonian Gravity"
 
         self.draw_calls = []
 
@@ -66,10 +69,27 @@ class EngineCore:
                 ui.handle_event(event)
         
         for obj in self.objects:
-            obj.update(self.gravity, self.bounciness, self.air_resistance, self.friction, self.floor, self.dt)
+            obj.update(self.gravity, self.bounciness, self.air_resistance, self.friction, self.floor, self.dt, self.sim_type)
             
         for ui in self.ui:
             ui.update()
+
+        if self.sim_type == "Newtonian Gravity":
+            for i in range(len(self.objects)):
+                for j in range(i+1, len(self.objects)):
+                    a = self.objects[i]
+                    b = self.objects[j]
+
+                    distance = (a.pos-b.pos).length()
+                    force = self.gravitational_constant * ((a.mass*b.mass)/(distance**2))
+                    a_force = (vec2(force, force) * ((a.pos - b.pos) / vec2(distance, distance))) * vec2(.5, .5)
+                    b_force = (vec2(force, force) * ((b.pos - a.pos) / vec2(distance, distance))) * vec2(.5, .5)
+                    
+                    print(a_force)
+
+                    a.add_force(a_force)
+                    b.add_force(b_force)
+
 
         for i in range(len(self.objects)):
             for j in range(i+1, len(self.objects)):
