@@ -85,8 +85,6 @@ class EngineCore:
                     a_force = (vec2(force, force) * ((a.pos - b.pos) / vec2(distance, distance))) * vec2(.5, .5)
                     b_force = (vec2(force, force) * ((b.pos - a.pos) / vec2(distance, distance))) * vec2(.5, .5)
                     
-                    print(a_force)
-
                     a.add_force(a_force)
                     b.add_force(b_force)
 
