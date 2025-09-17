@@ -181,3 +181,52 @@ class UIVec2:
 
     def set_value(self, val):
         self.value = val
+
+class UIChoice:
+    def __init__(self, values, pos, label, font):
+        self.value = values[0]
+        self.potential_values = values
+        self.pos = pos
+        self.label = label
+        self.font = font
+        self.width = 100
+        self.height = 20
+
+    def render(self, screen):
+        rect = pygame.Rect(self.pos.x, self.pos.y, self.width, self.height)
+        pygame.draw.rect(screen, (150, 30, 30), rect, border_radius=5)
+
+        text_surf = self.font.render(str(self.value), True, (255, 255, 255))
+        screen.blit(text_surf, (self.pos.x + 5, self.pos.y + (self.height - text_surf.get_height()) / 2))
+
+        text_surf = self.font.render(self.label, True, (255, 255, 255))
+        screen.blit(text_surf, (self.pos.x + 5 + self.width, self.pos.y + (self.height - text_surf.get_height()) / 2))
+    
+    def handle_event(self, event):
+        if event.type == pygame.MOUSEWHEEL:
+            mouse_pos = vec2(*pygame.mouse.get_pos())
+            index = 0
+            if (self.pos.x <= mouse_pos.x <= self.pos.x + self.width and self.pos.y <= mouse_pos.y <= self.pos.y + self.height):
+                scroll = event.y
+                scroll = max(scroll, -1)
+                scroll = min(scroll, 1)
+
+                index += scroll
+                if index > len(self.potential_values)-1:
+                    index = 0
+                if index < 0:
+                    index = len(self.potential_values)-1
+            self.value = self.potential_values[index]
+
+
+
+    def set_value(self, val):
+        self.value = val
+        if not self.bounds == None:
+            if self.value < self.bounds[0]:
+                self.value = self.bounds[0]
+            if self.value > self.bounds[1]:
+                self.value = self.bounds[1]
+
+    def get_value(self):
+        return self.value

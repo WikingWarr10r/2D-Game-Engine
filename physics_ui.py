@@ -8,6 +8,7 @@ class PhysicsUI:
 
         self.ui = UIObject("Physics Editor", pos, 300, 200, engine)
         self.ui.add_label("Engine Variables:")
+        self.ui.add_choice(["Basic", "Newtonian"], "Simulation Type")
         self.ui.add_number(600, "Floor Height")
         self.ui.add_number(10, "Gravity")
         self.ui.add_spacer()

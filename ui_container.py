@@ -41,6 +41,10 @@ class UIObject:
         self.elements.append(vec)
         self.lookup[label] = vec
 
+    def add_choice(self, choices: list, label):
+        choice = UIChoice(choices, vec2(0,0), label, self.font)
+        self.elements.append(choice)
+
     def get_value(self, label):
         if label in self.lookup:
             return self.lookup[label].get_value()
