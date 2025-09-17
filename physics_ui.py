@@ -38,6 +38,11 @@ class PhysicsUI:
         self.ui.add_label("Memory Usage: 0MB", id="mem")
     
     def update_simulation(self):
+        if self.ui.get_value("Simulation Type") == "Newtonian":
+            self.engine.sim_type = "Newtonian Gravity"
+        else:
+            self.engine.sim_type = "Basic"
+
         self.engine.floor = self.ui.get_value("Floor Height")
         self.engine.gravity = self.ui.get_value("Gravity")
         if self.ui.get_value("Pause Simulation") == True:

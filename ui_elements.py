@@ -189,7 +189,7 @@ class UIChoice:
         self.pos = pos
         self.label = label
         self.font = font
-        self.width = 100
+        self.width = 80
         self.height = 20
 
     def render(self, screen):
@@ -205,28 +205,14 @@ class UIChoice:
     def handle_event(self, event):
         if event.type == pygame.MOUSEWHEEL:
             mouse_pos = vec2(*pygame.mouse.get_pos())
-            index = 0
             if (self.pos.x <= mouse_pos.x <= self.pos.x + self.width and self.pos.y <= mouse_pos.y <= self.pos.y + self.height):
                 scroll = event.y
-                scroll = max(scroll, -1)
+                scroll = max(scroll, 0)
                 scroll = min(scroll, 1)
+                self.value = self.potential_values[scroll]
 
-                index += scroll
-                if index > len(self.potential_values)-1:
-                    index = 0
-                if index < 0:
-                    index = len(self.potential_values)-1
-            self.value = self.potential_values[index]
-
-
-
-    def set_value(self, val):
-        self.value = val
-        if not self.bounds == None:
-            if self.value < self.bounds[0]:
-                self.value = self.bounds[0]
-            if self.value > self.bounds[1]:
-                self.value = self.bounds[1]
+    def set_value(self, index):
+        self.value = self.potential_values[index]
 
     def get_value(self):
         return self.value
