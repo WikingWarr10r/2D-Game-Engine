@@ -69,13 +69,16 @@ class Object:
     def add_force(self, vec):
         self.vel += vec
     
-    def update(self, gravity, bounciness, air_resistance, friction, floor, dt, simulation_type):
+    def update(self, gravity, bounciness, air_density, drag_coefficient, friction, floor, dt, simulation_type):
         if simulation_type == "Basic":
             if dt == 0:
                 return
             self.pos = self.pos + (self.vel * vec2(dt, dt))
             self.vel = self.vel + (vec2(0, gravity * (dt*60)))
-            self.vel.x = self.vel.x * air_resistance
+            
+            air_res = vec2(-0.5, -0.5) * vec2(air_density, air_density) * self.vel * vec2(drag_coefficient, drag_coefficient) * (2*pi*self.radius/2)
+            self.add_force(air_res)
+
             self.collide(floor, bounciness, friction)
         
         elif simulation_type == "Newtonian Gravity":
