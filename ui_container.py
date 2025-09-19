@@ -46,6 +46,13 @@ class UIObject:
         self.elements.append(choice)
         self.lookup[label] = choice
 
+    def add_pie_chart(self, label):
+        pie_chart =  UIPieChart(vec2(0, 0), 100, None, self.font)
+        self.elements.append(pie_chart)
+        self.lookup[label] = pie_chart
+        for i in range(8):
+            self.add_spacer()
+
     def get_value(self, label):
         if label in self.lookup:
             return self.lookup[label].get_value()

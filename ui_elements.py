@@ -216,3 +216,64 @@ class UIChoice:
 
     def get_value(self):
         return self.value
+    
+class UIPieChart:
+    def __init__(self, pos, radius, colors=None, font=None):
+        self.pos = pos
+        self.radius = radius
+        self.colors = colors or []
+        self.font = font
+        self.values_dict = {}
+
+        self.width = radius * 2
+        self.height = radius * 2
+
+    def render(self, screen):
+        if not self.values_dict or sum(self.values_dict.values()) == 0:
+            return
+
+        total = sum(self.values_dict.values())
+        angle_start = 0
+        center = (int(self.pos.x + self.width / 2), int(self.pos.y + self.height / 2))
+
+        labels = list(self.values_dict.keys())
+        values = list(self.values_dict.values())
+
+        if len(self.colors) < len(values):
+            self.colors = []
+            for i in range(len(values)):
+                self.colors.append(((i * 70) % 255, (i * 130) % 255, (i * 200) % 255))
+
+        for i, v in enumerate(values):
+            fraction = v / total
+            angle_end = angle_start + fraction * 360
+
+            self._draw_slice(screen, center, self.radius, angle_start, angle_end, self.colors[i % len(self.colors)])
+
+            if self.font:
+                mid_angle = math.radians((angle_start + angle_end) / 2)
+                lx = center[0] + math.cos(mid_angle) * (self.radius * 0.6)
+                ly = center[1] + math.sin(mid_angle) * (self.radius * 0.6)
+                text_surf = self.font.render(f"{labels[i]}: {v*1000:.2f}ms", True, (255, 255, 255))
+                screen.blit(text_surf, (lx - text_surf.get_width() // 2, ly - text_surf.get_height() // 2))
+
+            angle_start = angle_end
+
+    def handle_event(self, event):
+        pass
+
+    def set_value(self, values_dict):
+        self.values_dict = values_dict
+
+    def get_value(self):
+        return self.values_dict
+
+    def _draw_slice(self, screen, center, radius, start_angle, end_angle, color):
+        points = [center]
+        for a in range(int(start_angle), int(end_angle) + 1, 2):
+            rad = math.radians(a)
+            x = center[0] + math.cos(rad) * radius
+            y = center[1] + math.sin(rad) * radius
+            points.append((x, y))
+        points.append(center)
+        pygame.draw.polygon(screen, color, points)

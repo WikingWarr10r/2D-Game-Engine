@@ -100,18 +100,30 @@ class EngineCore:
 
         start = time.time()
         if self.sim_type == "Newtonian Gravity":
-            for i in range(len(self.objects)):
-                for j in range(i+1, len(self.objects)):
-                    a = self.objects[i]
-                    b = self.objects[j]
+            objs = self.objects
+            G = self.gravitational_constant
 
-                    distance = (a.pos-b.pos).length()
-                    force = self.gravitational_constant * ((a.mass*b.mass)/(distance**2))
-                    a_force = (vec2(force, force) * ((a.pos - b.pos) / vec2(distance, distance))) * vec2(.5, .5)
-                    b_force = (vec2(force, force) * ((b.pos - a.pos) / vec2(distance, distance))) * vec2(.5, .5)
-                    
-                    a.add_force(a_force)
-                    b.add_force(b_force)
+            for i, a in enumerate(objs):
+                ax, ay, am = a.pos.x, a.pos.y, a.mass
+                for j in range(i + 1, len(objs)):
+                    b = objs[j]
+                    bx, by, bm = b.pos.x, b.pos.y, b.mass
+
+                    dx = bx - ax
+                    dy = by - ay
+                    dist2 = dx*dx + dy*dy
+                    if dist2 == 0:
+                        continue
+
+                    inv_dist = 1.0 / math.sqrt(dist2)
+                    force = G * am * bm * inv_dist * inv_dist
+
+                    fx = force * dx * inv_dist
+                    fy = force * dy * inv_dist
+
+                    a.add_force(vec2(-fx, -fy))
+                    b.add_force(vec2(fx, fy))
+
         self.newtonian_physics_time = time.time() - start
 
         start = time.time()
