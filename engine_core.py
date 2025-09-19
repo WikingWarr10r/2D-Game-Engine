@@ -31,6 +31,15 @@ class EngineCore:
 
         self.process = psutil.Process(os.getpid())
 
+        self.obj_render_time = 0.0
+        self.draw_call_render_time = 0.0
+        self.ui_render_time = 0.0
+        self.event_handle_time = 0.0
+        self.obj_update_time = 0.0
+        self.ui_update_time = 0.0
+        self.newtonian_physics_time = 0.0
+        self.basic_physics_time = 0.0
+
         self.setup_screen()
 
     def setup_screen(self, width=1280, height=720):
@@ -48,33 +57,48 @@ class EngineCore:
         self.draw_calls.append(lambda: pygame.draw.line(self.screen, colour, (start.x, start.y), (end.x, end.y)))
 
     def render(self):
+        start = 0
         self.screen.fill("black")
         pygame.draw.line(self.screen, "white", (0, self.floor), (1280, self.floor), 5)
 
+        start = time.time()
         for obj in self.objects:
             obj.render(self.screen)
+        self.obj_render_time = time.time() - start
 
+        start = time.time()
         for draw_call in self.draw_calls:
             draw_call()
         self.draw_calls.clear()
+        self.draw_call_render_time = time.time() - start
 
+        start = time.time()
         for ui in self.ui:
             ui.render(self.screen)
+        self.ui_render_time = time.time() - start
 
     def main_loop(self):
+        start = 0
+        start = time.time()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
                 raise SystemExit
             for ui in self.ui:
                 ui.handle_event(event)
+        self.event_handle_time = time.time() - start
         
+        start = time.time()
         for obj in self.objects:
             obj.update(self.gravity, self.bounciness, self.air_density, self.drag_coefficient, self.friction, self.floor, self.dt, self.sim_type)
-            
+        self.obj_update_time = time.time() - start
+
+        start = time.time()
         for ui in self.ui:
             ui.update()
+        self.ui_update_time = time.time() - start
 
+        start = time.time()
         if self.sim_type == "Newtonian Gravity":
             for i in range(len(self.objects)):
                 for j in range(i+1, len(self.objects)):
@@ -88,8 +112,9 @@ class EngineCore:
                     
                     a.add_force(a_force)
                     b.add_force(b_force)
+        self.newtonian_physics_time = time.time() - start
 
-
+        start = time.time()
         for i in range(len(self.objects)):
             for j in range(i+1, len(self.objects)):
                 a = self.objects[i]
@@ -97,7 +122,8 @@ class EngineCore:
                 if a.check_collision(b):
                     a.resolve_overlap(b)
                     a.collision_response(b)
-        
+        self.basic_physics_time = time.time() - start
+
         self.render()
 
         pygame.display.flip()
