@@ -14,7 +14,8 @@ class ProfilerUI:
         self.ui.add_label("UI Update Time: 0", id="ui_update")
         self.ui.add_label("Newtonian Physics Time: 0", id="newton_phys_time")
         self.ui.add_label("Basic Physics Time: 0", id="basic_phys_time")
-        self.ui.add_pie_chart("Profiler Times")
+        self.ui.add_label("Total Time: 0", id="tot_time")
+        self.ui.add_label("Excess Time: 0", id = "excess_time")
 
     def update_profiler(self): 
         profiler_times = [self.engine.obj_render_time, self.engine.draw_call_render_time, self.engine.ui_render_time, self.engine.event_handle_time, self.engine.obj_update_time, self.engine.ui_update_time, self.engine.newtonian_physics_time, self.engine.basic_physics_time]
@@ -38,4 +39,5 @@ class ProfilerUI:
         self.ui.set_value("ui_update", f"UI Update Time: {profiler_times[5]*1000:.2f}ms")
         self.ui.set_value("newton_phys_time", f"Newtonian Physics Time: {profiler_times[6]*1000:.2f}ms")
         self.ui.set_value("basic_phys_time", f"Basic Physics Time: {profiler_times[7]*1000:.2f}ms")
-        self.ui.set_value("Profiler Times", profiler_dict)
+        self.ui.set_value("tot_time", f"Total Time: {sum(profiler_times)*1000:.2f}ms")
+        self.ui.set_value("excess_time", f"Excess Time: {16 - (sum(profiler_times)*1000):.2f}ms")
