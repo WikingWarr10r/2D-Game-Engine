@@ -116,13 +116,27 @@ class EngineCore:
                         continue
 
                     inv_dist = 1.0 / math.sqrt(dist2)
+
+                    kelvin = inv_dist*1000000
+                    col = kelvin_to_col(kelvin)
+                    self.draw_line(a.pos, b.pos, col)
+
+                    if 1/inv_dist > 200:
+                        continue
+
                     force = G * am * bm * inv_dist * inv_dist
 
                     fx = force * dx * inv_dist
                     fy = force * dy * inv_dist
 
-                    a.add_force(vec2(-fx, -fy))
-                    b.add_force(vec2(fx, fy))
+                    if not a.lock:
+                        a.add_force(vec2(-fx, -fy))
+                    else:
+                        a.vel = vec2(0,0)
+                    if not b.lock:
+                        b.add_force(vec2(fx, fy))
+                    else:
+                        b.vel = vec2(0,0)
 
         self.newtonian_physics_time = time.time() - start
 
@@ -133,7 +147,8 @@ class EngineCore:
                 b = self.objects[j]
                 if a.check_collision(b):
                     a.resolve_overlap(b)
-                    a.collision_response(b)
+                    if not a.lock:
+                        a.collision_response(b)
         self.basic_physics_time = time.time() - start
 
         self.render()
@@ -141,5 +156,5 @@ class EngineCore:
         pygame.display.flip()
         self.clock.tick(60)
     
-    def add_object(self, pos: vec2, vel: vec2, radius):
-        self.objects.append(Object(pos, vel, radius))
+    def add_object(self, pos: vec2, vel: vec2, radius, lock = False):
+        self.objects.append(Object(pos, vel, radius, lock))

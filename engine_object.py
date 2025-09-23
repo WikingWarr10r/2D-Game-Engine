@@ -2,9 +2,11 @@ import pygame
 from engine_math import *
 
 class Object:
-    def __init__(self, pos: vec2, vel: vec2, radius):
+    def __init__(self, pos: vec2, vel: vec2, radius, lock = False):
         self.pos = pos
         self.vel = vel
+
+        self.lock = lock
 
         self.density = 0.0014147106
         
@@ -84,6 +86,5 @@ class Object:
         elif simulation_type == "Newtonian Gravity":
             self.pos = self.pos + (self.vel * vec2(dt, dt))
 
-            
     def render(self, screen):
         pygame.draw.circle(screen, "white", (self.pos.x, self.pos.y), self.radius)
