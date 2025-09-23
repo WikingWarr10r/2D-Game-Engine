@@ -53,8 +53,8 @@ class EngineCore:
         self.draw_calls.append(lambda: pygame.draw.line(self.screen, colour, (centre.x - 10, centre.y), (centre.x + 10, centre.y)))
         self.draw_calls.append(lambda: pygame.draw.line(self.screen, colour, (centre.x, centre.y - 10), (centre.x, centre.y + 10)))
 
-    def draw_line(self, start, end, colour=(255, 255, 255, 122)):
-        self.draw_calls.append(lambda: pygame.draw.line(self.screen, colour, (start.x, start.y), (end.x, end.y)))
+    def draw_line(self, start, end, colour=(255, 255, 255, 122), thickness=1):
+        self.draw_calls.append(lambda: pygame.draw.line(self.screen, colour, (start.x, start.y), (end.x, end.y), thickness))
 
     def render(self):
         start = 0
@@ -62,15 +62,15 @@ class EngineCore:
         pygame.draw.line(self.screen, "white", (0, self.floor), (1280, self.floor), 5)
 
         start = time.time()
-        for obj in self.objects:
-            obj.render(self.screen)
-        self.obj_render_time = time.time() - start
-
-        start = time.time()
         for draw_call in self.draw_calls:
             draw_call()
         self.draw_calls.clear()
         self.draw_call_render_time = time.time() - start
+
+        start = time.time()
+        for obj in self.objects:
+            obj.render(self.screen)
+        self.obj_render_time = time.time() - start
 
         start = time.time()
         for ui in self.ui:
@@ -117,26 +117,29 @@ class EngineCore:
 
                     inv_dist = 1.0 / math.sqrt(dist2)
 
-                    kelvin = inv_dist*1000000
-                    col = kelvin_to_col(kelvin)
-                    self.draw_line(a.pos, b.pos, col)
-
-                    if 1/inv_dist > 200:
-                        continue
+                    kelvin = inv_dist * 1_000_000
+                    col = kelvin_to_col(min(kelvin, 40000))
+                    self.draw_line(a.pos, b.pos, col, max(1, int(kelvin/3000)))
 
                     force = G * am * bm * inv_dist * inv_dist
 
-                    fx = force * dx * inv_dist
-                    fy = force * dy * inv_dist
+                    nx = dx * inv_dist
+                    ny = dy * inv_dist
+
+                    ax_force = (force / am) * nx
+                    ay_force = (force / am) * ny
+                    bx_force = (force / bm) * nx
+                    by_force = (force / bm) * ny
 
                     if not a.lock:
-                        a.add_force(vec2(-fx, -fy))
+                        a.add_force(vec2(-ax_force, -ay_force))
                     else:
-                        a.vel = vec2(0,0)
+                        a.vel = vec2(0, 0)
+
                     if not b.lock:
-                        b.add_force(vec2(fx, fy))
+                        b.add_force(vec2(bx_force, by_force))
                     else:
-                        b.vel = vec2(0,0)
+                        b.vel = vec2(0, 0)
 
         self.newtonian_physics_time = time.time() - start
 
@@ -149,6 +152,10 @@ class EngineCore:
                     a.resolve_overlap(b)
                     if not a.lock:
                         a.collision_response(b)
+
+        for obj in self.objects:
+            if obj.lock:
+                obj.pos = obj.initial_pos
         self.basic_physics_time = time.time() - start
 
         self.render()

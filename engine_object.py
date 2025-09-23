@@ -4,6 +4,7 @@ from engine_math import *
 class Object:
     def __init__(self, pos: vec2, vel: vec2, radius, lock = False):
         self.pos = pos
+        self.initial_pos = pos
         self.vel = vel
 
         self.lock = lock
