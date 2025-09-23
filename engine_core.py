@@ -119,7 +119,7 @@ class EngineCore:
 
                     kelvin = inv_dist * 1_000_000
                     col = kelvin_to_col(min(kelvin, 40000))
-                    self.draw_line(a.pos, b.pos, col, max(1, int(kelvin/3000)))
+                    self.draw_line(a.pos, b.pos, col, max(1, int(kelvin/3000), int(kelvin/3000)))
 
                     force = G * am * bm * inv_dist * inv_dist
 
