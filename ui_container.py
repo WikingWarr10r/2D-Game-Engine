@@ -14,6 +14,9 @@ class UIObject:
         self.dragging = False
         self.drag_offset = vec2(0, 0)
 
+        self.collapsed = False
+        self.min_button_size = 12
+
         self.font = pygame.font.Font("font/ProggyClean.ttf", 16)
 
     def add_number(self, val: int, label, bounds=None):
@@ -63,8 +66,20 @@ class UIObject:
             self.lookup[label].set_value(val)
 
     def handle_event(self, event):
-        for elem in self.elements:
-            elem.handle_event(event)
+        if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
+            mouse_pos = vec2(*event.pos)
+            btn_rect = pygame.Rect(
+                self.pos.x + self.width - self.min_button_size - 2,
+                self.pos.y + 2,
+                self.min_button_size,
+                self.min_button_size
+            )
+            if btn_rect.collidepoint(mouse_pos.x, mouse_pos.y):
+                self.collapsed = not self.collapsed
+
+        if not self.collapsed:
+            for elem in self.elements:
+                elem.handle_event(event)
 
     def update(self):
         mouse_pos = vec2(*pygame.mouse.get_pos())
@@ -80,20 +95,43 @@ class UIObject:
         else:
             self.dragging = False
 
-    def render(self, screen):
-        self.height = 20 + len(self.elements) * 25
+        if self.collapsed:
+            self.height = 15
+        else:
+            self.height = 20 + len(self.elements) * 25
 
+    def render(self, screen):
         surf = pygame.Surface((self.width, self.height), pygame.SRCALPHA)
 
-        pygame.draw.rect(surf, (30, 30, 30, 200), (0, 0, self.width, self.height), border_radius=5)
-
+        pygame.draw.rect(
+            surf,
+            (30, 30, 30, 200) if not self.collapsed else (30, 30, 30, 200),
+            (0, 0, self.width, self.height),
+            border_radius=5
+        )
         pygame.draw.rect(surf, (150, 30, 30, 200), (0, 0, self.width, 15), border_radius=5)
+
+        pygame.draw.rect(
+            surf,
+            (200, 50, 50, 200),
+            (self.width - self.min_button_size - 2, 2, self.min_button_size, self.min_button_size)
+        )
+        sign = "-" if not self.collapsed else "+"
+        sign_surf = self.font.render(sign, True, (255, 255, 255))
+        surf.blit(
+            sign_surf,
+            (
+                self.width - self.min_button_size - 2 + (self.min_button_size - sign_surf.get_width()) / 2,
+                2 + (self.min_button_size - sign_surf.get_height()) / 2
+            )
+        )
 
         screen.blit(surf, (self.pos.x, self.pos.y))
 
         title_surf = self.font.render(self.title, True, (255, 255, 255))
         screen.blit(title_surf, (self.pos.x + 5, self.pos.y + (15 - title_surf.get_height()) / 2))
 
-        for i, elem in enumerate(self.elements):
-            elem.pos = vec2(self.pos.x + 5, self.pos.y + 20 + i * 25)
-            elem.render(screen)
+        if not self.collapsed:
+            for i, elem in enumerate(self.elements):
+                elem.pos = vec2(self.pos.x + 5, self.pos.y + 20 + i * 25)
+                elem.render(screen)
