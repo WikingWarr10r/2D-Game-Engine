@@ -5,6 +5,7 @@ class PhysicsUI:
     def __init__(self, engine, pos):
         self.engine = engine
         self.held = False
+        self.held_undo = False
 
         self.ui = UIObject("Physics Editor", pos, 300, 200, engine)
         self.ui.add_label("Engine Variables:")
@@ -23,6 +24,7 @@ class PhysicsUI:
         self.ui.add_button(False, "Mouse Mode", False)
         self.ui.add_button(False, "Fast Spawn", False)
         self.ui.add_button(False, "Locked", False)
+        self.ui.add_button(False, "Undo", True)
         self.ui.add_spacer()
         
         self.ui.add_label("Simulation:")
@@ -87,6 +89,14 @@ class PhysicsUI:
         else:
             if not self.ui.get_value("Mouse Mode"):
                 self.held = False
+
+        if self.ui.get_value("Undo"):
+            if self.held_undo == False:
+                if len(self.engine.objects) >= 1:
+                    self.engine.objects.remove(self.engine.objects[-1])
+                self.held_undo = True
+        else:
+            self.held_undo = False
 
         self.engine.draw_cross(position)
         self.engine.draw_line(position, position + (velocity/vec2(10, 10)), (255, 0, 0, 122))
