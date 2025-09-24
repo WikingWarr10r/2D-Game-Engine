@@ -3,6 +3,7 @@ import time
 import psutil
 import os
 from collections import deque
+from copy import deepcopy
 
 from engine_math import *
 from engine_object import *
@@ -47,7 +48,7 @@ class EngineCore:
         pygame.display.set_caption("Engine")
         
     def draw_circle(self, radius, pos:vec2, colour=(255, 255, 255, 122)):
-        self.draw_calls.append(lambda: pygame.draw.circle(self.screen, colour, pos, radius))
+        self.draw_calls.append(lambda: pygame.draw.circle(self.screen, colour, (pos.x, pos.y), radius))
     
     def draw_cross(self, centre, colour=(255, 255, 255, 122)):
         self.draw_calls.append(lambda: pygame.draw.line(self.screen, colour, (centre.x - 10, centre.y), (centre.x + 10, centre.y)))
@@ -59,12 +60,20 @@ class EngineCore:
     def render(self):
         start = 0
         self.screen.fill("black")
-        pygame.draw.line(self.screen, "white", (0, self.floor), (1280, self.floor), 5)
+        if self.sim_type == "Basic":
+            pygame.draw.line(self.screen, "white", (0, self.floor), (1280, self.floor), 5)
 
         start = time.time()
         for draw_call in self.draw_calls:
             draw_call()
         self.draw_calls.clear()
+
+        if self.dt == 0 and self.sim_type == "Newtonian Gravity":
+            positions = self.predict_future()
+            for obj in positions:
+                if len(obj) > 2:
+                    pygame.draw.lines(self.screen, (255, 122, 122, 122), False, obj)
+        
         self.draw_call_render_time = time.time() - start
 
         start = time.time()
@@ -166,3 +175,55 @@ class EngineCore:
     
     def add_object(self, pos: vec2, vel: vec2, radius, lock = False):
         self.objects.append(Object(pos, vel, radius, lock))
+
+    def predict_future(self, steps=300):
+        objs = deepcopy(self.objects)
+        positions = []
+        G = self.gravitational_constant
+
+        for _ in range(steps):
+            for i, a in enumerate(objs):
+                positions.append([])
+                ax, ay, am = a.pos.x, a.pos.y, a.mass
+                for j in range(i + 1, len(objs)):
+                    positions.append([])
+                    b = objs[j]
+                    bx, by, bm = b.pos.x, b.pos.y, b.mass
+
+                    dx = bx - ax
+                    dy = by - ay
+                    dist2 = dx*dx + dy*dy
+                    if dist2 == 0:
+                        continue
+
+                    inv_dist = 1.0 / math.sqrt(dist2)
+
+                    kelvin = inv_dist * 500_000
+                    col = kelvin_to_col(min(kelvin, 40000))
+                    if math.sqrt(dist2) < 200:
+                        self.draw_line(a.pos, b.pos, col, max(1, int(kelvin/3000), int(kelvin/1500)))
+
+                    force = G * am * bm * inv_dist * inv_dist
+
+                    nx = dx * inv_dist
+                    ny = dy * inv_dist
+
+                    ax_force = (force / am) * nx
+                    ay_force = (force / am) * ny
+                    bx_force = (force / bm) * nx
+                    by_force = (force / bm) * ny
+
+                    if not a.lock:
+                        a.add_force(vec2(-ax_force, -ay_force))
+                    else:
+                        a.vel = vec2(0, 0)
+
+                    if not b.lock:
+                        b.add_force(vec2(bx_force, by_force))
+                    else:
+                        b.vel = vec2(0, 0)
+
+                    positions[i].append((a.pos.x, a.pos.y))
+                    positions[j].append((b.pos.x, b.pos.y))
+        
+        return positions
