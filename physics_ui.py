@@ -12,6 +12,7 @@ class PhysicsUI:
         self.ui.add_choice(["Basic", "Newtonian"], "Simulation Type")
         self.ui.add_number(600, "Floor Height")
         self.ui.add_number(10, "Gravity")
+        self.ui.add_button(False, "Gravity Debug", False)
         self.ui.add_spacer()
 
         self.ui.add_label("Spawn Position:")
@@ -54,6 +55,8 @@ class PhysicsUI:
             self.engine.dt = 1/60
 
         self.engine.dt /= self.ui.get_value("Delta Time Divisor")
+
+        self.engine.gravity_debug = self.ui.get_value("Gravity Debug")
 
         if self.ui.get_value("Clear Objects"):
             self.engine.objects = []

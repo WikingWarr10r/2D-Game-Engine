@@ -36,6 +36,7 @@ class EngineCore:
 
         self.future_positions = []
         self.predict_freq = 0.5
+        self.gravity_debug = False
 
         self.obj_render_time = 0.0
         self.draw_call_render_time = 0.0
@@ -135,7 +136,7 @@ class EngineCore:
 
                     kelvin = inv_dist * 500_000
                     col = kelvin_to_col(min(kelvin, 40000))
-                    if math.sqrt(dist2) < 200:
+                    if math.sqrt(dist2) < 200 and self.gravity_debug:
                         self.draw_line(a.pos, b.pos, col, max(1, int(kelvin/3000), int(kelvin/1500)))
 
                     force = G * am * bm * inv_dist * inv_dist * (self.dt * 60)
