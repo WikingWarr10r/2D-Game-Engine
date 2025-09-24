@@ -32,6 +32,11 @@ class EngineCore:
 
         self.process = psutil.Process(os.getpid())
 
+        self.frame_num = 0
+
+        self.future_positions = []
+        self.predict_freq = 0.5
+
         self.obj_render_time = 0.0
         self.draw_call_render_time = 0.0
         self.ui_render_time = 0.0
@@ -69,8 +74,9 @@ class EngineCore:
         self.draw_calls.clear()
 
         if self.dt == 0 and self.sim_type == "Newtonian Gravity":
-            positions = self.predict_future()
-            for obj in positions:
+            if self.frame_num % (self.predict_freq * 60) == 0:
+                self.future_positions = self.predict_future()
+            for obj in self.future_positions:
                 if len(obj) > 2:
                     pygame.draw.lines(self.screen, (255, 122, 122, 122), False, obj)
         
@@ -87,6 +93,7 @@ class EngineCore:
         self.ui_render_time = time.time() - start
 
     def main_loop(self):
+        self.frame_num += 1
         start = 0
         start = time.time()
         for event in pygame.event.get():
@@ -131,7 +138,7 @@ class EngineCore:
                     if math.sqrt(dist2) < 200:
                         self.draw_line(a.pos, b.pos, col, max(1, int(kelvin/3000), int(kelvin/1500)))
 
-                    force = G * am * bm * inv_dist * inv_dist
+                    force = G * am * bm * inv_dist * inv_dist * (self.dt * 60)
 
                     nx = dx * inv_dist
                     ny = dy * inv_dist
@@ -176,7 +183,7 @@ class EngineCore:
     def add_object(self, pos: vec2, vel: vec2, radius, lock = False):
         self.objects.append(Object(pos, vel, radius, lock))
 
-    def predict_future(self, steps=300):
+    def predict_future(self, steps=1000):
         objs = deepcopy(self.objects)
         positions = []
         G = self.gravitational_constant
@@ -198,12 +205,7 @@ class EngineCore:
 
                     inv_dist = 1.0 / math.sqrt(dist2)
 
-                    kelvin = inv_dist * 500_000
-                    col = kelvin_to_col(min(kelvin, 40000))
-                    if math.sqrt(dist2) < 200:
-                        self.draw_line(a.pos, b.pos, col, max(1, int(kelvin/3000), int(kelvin/1500)))
-
-                    force = G * am * bm * inv_dist * inv_dist
+                    force = G * am * bm * inv_dist * inv_dist * (1/60 * 60)
 
                     nx = dx * inv_dist
                     ny = dy * inv_dist
@@ -225,5 +227,9 @@ class EngineCore:
 
                     positions[i].append((a.pos.x, a.pos.y))
                     positions[j].append((b.pos.x, b.pos.y))
+
+            for obj in objs:
+                obj.update(self.gravity, self.bounciness, self.air_density, self.drag_coefficient, self.friction, self.floor, 1/60, self.sim_type)
+
         
         return positions
