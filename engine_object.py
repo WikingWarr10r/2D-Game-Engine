@@ -23,17 +23,31 @@ class Object:
         dist = (delta.x**2 + delta.y**2) ** 0.5
         if dist == 0:
             dist = 0.01
-        
+
         overlap = (self.radius + other.radius) - dist
-        
+        if overlap <= 0:
+            return
+
         normal = vec2(delta.x / dist, delta.y / dist)
-        
-        self.pos.x -= normal.x * overlap/2
-        self.pos.y -= normal.y * overlap/2
-        other.pos.x += normal.x * overlap/2
-        other.pos.y += normal.y * overlap/2
+
+        if self.lock and other.lock:
+            return 
+        elif self.lock:
+            other.pos.x += normal.x * overlap
+            other.pos.y += normal.y * overlap
+        elif other.lock:
+            self.pos.x -= normal.x * overlap
+            self.pos.y -= normal.y * overlap
+        else:
+            self.pos.x -= normal.x * overlap / 2
+            self.pos.y -= normal.y * overlap / 2
+            other.pos.x += normal.x * overlap / 2
+            other.pos.y += normal.y * overlap / 2
     
     def collision_response(self, other):
+        if self.lock and other.lock:
+            return 
+
         delta = other.pos - self.pos
         dist = (delta.x ** 2 + delta.y ** 2) ** 0.5
         if dist == 0:
@@ -48,14 +62,15 @@ class Object:
             return
 
         restitution = 0.7
-
         impulse_scalar = -(1 + restitution) * vel_along_normal
-        impulse_scalar /= (1 / self.mass + 1 / other.mass)
+        impulse_scalar /= (0 if self.lock else 1 / self.mass) + (0 if other.lock else 1 / other.mass)
 
         impulse = normal * impulse_scalar
 
-        self.vel = self.vel - impulse * (1 / self.mass)
-        other.vel = other.vel + impulse * (1 / other.mass)   
+        if not self.lock:
+            self.vel = self.vel - impulse * (1 / self.mass)
+        if not other.lock:
+            other.vel = other.vel + impulse * (1 / other.mass)
 
     def collide(self, lower, bounciness, friction):
         if self.pos.y > lower-self.radius:
@@ -73,6 +88,9 @@ class Object:
         self.vel += vec
     
     def update(self, gravity, bounciness, air_density, drag_coefficient, friction, floor, dt, simulation_type):
+        if self.lock:
+            return  # skip all motion updates
+
         if simulation_type == "Basic":
             if dt == 0:
                 return
@@ -86,6 +104,7 @@ class Object:
         
         elif simulation_type == "Newtonian Gravity":
             self.pos = self.pos + (self.vel * vec2(dt, dt))
+
 
     def render(self, screen):
         pygame.draw.circle(screen, "white", (self.pos.x, self.pos.y), self.radius)

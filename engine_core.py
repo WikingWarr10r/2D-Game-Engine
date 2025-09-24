@@ -168,12 +168,8 @@ class EngineCore:
                 b = self.objects[j]
                 if a.check_collision(b):
                     a.resolve_overlap(b)
-                    if not a.lock:
-                        a.collision_response(b)
-
-        for obj in self.objects:
-            if obj.lock:
-                obj.pos = obj.initial_pos
+                    a.collision_response(b)
+                    
         self.basic_physics_time = time.time() - start
 
         self.render()
