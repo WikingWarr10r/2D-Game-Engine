@@ -117,9 +117,10 @@ class EngineCore:
 
                     inv_dist = 1.0 / math.sqrt(dist2)
 
-                    kelvin = inv_dist * 1_000_000
+                    kelvin = inv_dist * 500_000
                     col = kelvin_to_col(min(kelvin, 40000))
-                    self.draw_line(a.pos, b.pos, col, max(1, int(kelvin/3000), int(kelvin/3000)))
+                    if math.sqrt(dist2) < 200:
+                        self.draw_line(a.pos, b.pos, col, max(1, int(kelvin/3000), int(kelvin/1500)))
 
                     force = G * am * bm * inv_dist * inv_dist
 
