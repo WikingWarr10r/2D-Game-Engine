@@ -14,6 +14,24 @@ class Object:
         self.radius = radius
         self.mass = (pi * radius * radius) * self.density
 
+    def store(self):
+        return f"{self.pos.x},{self.pos.y} {self.initial_pos.x},{self.initial_pos.y} {self.vel.x},{self.vel.y} {self.lock} {self.radius} {self.mass}"
+
+    @staticmethod
+    def recreate_obj(stored):
+        parts = stored.split(" ")
+        pos_x, pos_y = map(float, parts[0].split(","))
+        init_x, init_y = map(float, parts[1].split(","))
+        vel_x, vel_y = map(float, parts[2].split(","))
+        lock = True if parts[3] == "True" else False
+        radius = float(parts[4])
+        mass = float(parts[5])
+
+        obj = Object(vec2(pos_x, pos_y), vec2(vel_x, vel_y), radius, lock)
+        obj.initial_pos = vec2(init_x, init_y)
+        obj.mass = mass
+        return obj
+
     def check_collision(self, other):
         distance = ((self.pos.x - other.pos.x) ** 2 + (self.pos.y - other.pos.y) ** 2) ** 0.5
         return distance < (self.radius + other.radius)
