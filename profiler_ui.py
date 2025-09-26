@@ -41,3 +41,6 @@ class ProfilerUI:
         self.ui.set_value("basic_phys_time", f"Basic Physics Time: {profiler_times[7]*1000:.2f}ms")
         self.ui.set_value("tot_time", f"Total Time: {sum(profiler_times)*1000:.2f}ms")
         self.ui.set_value("excess_time", f"Excess Time: {16 - (sum(profiler_times)*1000):.2f}ms")
+
+    def regenerate(self):
+        pass

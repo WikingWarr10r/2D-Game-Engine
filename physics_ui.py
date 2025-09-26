@@ -109,3 +109,16 @@ class PhysicsUI:
         self.ui.set_value("num_objects", f"Number Of Objects: {len(self.engine.objects)}")
         self.ui.set_value("dt", f"Fixed Timestep: {smart_number(self.engine.dt)}")
         self.ui.set_value("mem", f"Memory Usage: {self.engine.process.memory_info().rss / 1024**2:.2f}MB")
+
+    def regenerate(self):
+        self.ui.set_value("Gravity", self.engine.gravity)
+        self.ui.set_value("Floor Height", self.engine.floor)
+        if self.engine.dt == 0:
+            self.ui.set_value("Delta Time Divisor", 1)
+        else:
+            self.ui.set_value("Delta Time Divisor", int((1/60)/self.engine.dt))
+
+        if self.engine.sim_type == "Newtonian Gravity":
+            self.ui.set_value("Simulation Type", 1)
+        else:
+            self.ui.set_value("Simulation Type", 0)
