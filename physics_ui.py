@@ -76,7 +76,7 @@ class PhysicsUI:
         if self.ui.get_value("Mouse Mode"):
             self.ui.set_value("Position", mouse_pos)
             if pygame.mouse.get_pressed()[0] and not ui_rect.collidepoint(mouse_pos.x, mouse_pos.y) and self.held == False:
-                self.engine.add_object(position, velocity, radius, lock)
+                self.engine.add_circle(position, velocity, radius, lock)
                 self.held = True
             if not pygame.mouse.get_pressed()[0]:
                 self.held = False
@@ -87,7 +87,7 @@ class PhysicsUI:
 
         if self.ui.get_value("Add New Object"):
             if self.held == False:
-                self.engine.add_object(position, velocity, radius, lock)
+                self.engine.add_circle(position, velocity, radius, lock)
                 self.held = True
         else:
             if not self.ui.get_value("Mouse Mode"):

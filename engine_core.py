@@ -177,8 +177,11 @@ class EngineCore:
         pygame.display.flip()
         self.clock.tick(60)
     
-    def add_object(self, pos: vec2, vel: vec2, radius, lock = False):
+    def add_circle(self, pos: vec2, vel: vec2, radius, lock = False):
         self.objects.append(Object(pos, vel, radius, lock))
+
+    def add_rect(self, pos: vec2, vel: vec2, width, height, lock = False):
+        self.objects.append(Rectangle(pos, vel, width, height, lock))
 
     def predict_future(self, steps=1000):
         objs = deepcopy(self.objects)
