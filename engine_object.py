@@ -1,11 +1,16 @@
 import pygame
 from engine_math import *
+from camera import Camera
 
 class Object:
-    def __init__(self, pos: vec2, vel: vec2, radius, lock = False):
+    def __init__(self, pos: vec2, vel: vec2, radius, cam: Camera, lock = False):
         self.pos = pos
         self.initial_pos = pos
         self.vel = vel
+
+        self.cam = cam
+
+        self.ss_pos = cam.update_vector(self.pos)
 
         self.lock = lock
 
@@ -124,14 +129,21 @@ class Object:
             self.pos = self.pos + (self.vel * vec2(dt, dt))
 
     def render(self, screen):
-        pygame.draw.circle(screen, "white", (self.pos.x, self.pos.y), self.radius)
+        self.ss_pos = self.cam.update_vector(self.pos)
+
+        pygame.draw.circle(screen, "white", (self.ss_pos.x, self.ss_pos.y), self.cam.update_num(self.radius))
 
 
 class Rectangle:
-    def __init__(self, pos: vec2, vel: vec2, width, height, lock=False):
+    def __init__(self, pos: vec2, vel: vec2, width, height, cam: Camera, lock=False):
         self.pos = pos
         self.initial_pos = pos
         self.vel = vel
+
+        self.cam = cam
+
+        self.ss_pos = cam.update_vector(self.pos)
+
         self.lock = lock
 
         self.density = 0.0014147106
@@ -302,4 +314,8 @@ class Rectangle:
             self.pos = self.pos + (self.vel * vec2(dt, dt))
     
     def render(self, screen):
-        pygame.draw.rect(screen, "white", pygame.Rect(self.pos.x - self.width/2, self.pos.y - self.height/2, self.width, self.height))
+        self.ss_pos = self.cam.update_vector(self.pos)
+        ss_height = self.cam.update_num(self.height)
+        ss_width = self.cam.update_num(self.width)
+
+        pygame.draw.rect(screen, "white", pygame.Rect(self.ss_pos.x - ss_width/2, self.ss_pos.y - ss_height/2, ss_width, ss_height))

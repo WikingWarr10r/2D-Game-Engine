@@ -34,6 +34,8 @@ class EngineCore:
 
         self.frame_num = 0
 
+        self.cam = None
+
         self.future_positions = []
         self.predict_freq = 0.5
         self.gravity_debug = False
@@ -178,10 +180,10 @@ class EngineCore:
         self.clock.tick(60)
     
     def add_circle(self, pos: vec2, vel: vec2, radius, lock = False):
-        self.objects.append(Object(pos, vel, radius, lock))
+        self.objects.append(Object(pos, vel, radius, self.cam, lock))
 
     def add_rect(self, pos: vec2, vel: vec2, width, height, lock = False):
-        self.objects.append(Rectangle(pos, vel, width, height, lock))
+        self.objects.append(Rectangle(pos, vel, width, height, self.cam, lock))
 
     def predict_future(self, steps=1000):
         objs = deepcopy(self.objects)
@@ -231,5 +233,7 @@ class EngineCore:
             for obj in objs:
                 obj.update(self.gravity, self.bounciness, self.air_density, self.drag_coefficient, self.friction, self.floor, 1/60, self.sim_type)
 
-        
         return positions
+    
+    def add_camera(self, cam):
+        self.cam = cam

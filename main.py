@@ -2,8 +2,12 @@ from engine_core import *
 from physics_ui import PhysicsUI
 from profiler_ui import ProfilerUI
 from scene_manager_ui import SceneManagerUI
+from camera import Camera
 
 engine = EngineCore()
+
+cam = Camera(vec2(0,0), 1)
+engine.add_camera(cam)
 
 ui = PhysicsUI(engine, vec2(950, 30))
 profiler = ProfilerUI(engine, vec2(30, 30))
