@@ -1,4 +1,5 @@
 from engine_object import Object
+import os
 
 class SceneManager:
     def __init__(self, engine):
@@ -44,27 +45,37 @@ class SceneManager:
         scene.close()
 
     def load(self):
-        generated_scene = ""
-        with open("Scenes/main.scene", "r") as scene:
-            generated_scene = scene.readline()
-        scene.close()
-        scn = generated_scene.split("~")
-        objs = scn[-1]
-        scn.remove(scn[-1])
+        try:
+            generated_scene = ""
+            with open("Scenes/main.scene", "r") as scene:
+                generated_scene = scene.readline()
+            scene.close()
+            scn = generated_scene.split("~")
+            objs = scn[-1]
+            scn.remove(scn[-1])
 
-        objects = objs.split("#")
-        final_objects = []
-        for stored_obj in objects:
-            final_objects.append(Object.recreate_obj(stored_obj))
+            objects = objs.split("#")
+            final_objects = []
+            for stored_obj in objects:
+                final_objects.append(Object.recreate_obj(stored_obj))
 
-        self.engine.gravity = int(scn[0])
-        self.engine.bounciness = float(scn[1])
-        self.engine.air_density = float(scn[2])
-        self.engine.drag_coefficient = float(scn[3])
-        self.engine.friction = float(scn[4])
-        self.engine.floor = int(scn[5])
-        self.engine.dt = float(scn[6])
-        self.engine.gravitational_constant = float(scn[7])
-        self.engine.sim_type = str(scn[8])
+            self.engine.gravity = int(scn[0])
+            self.engine.bounciness = float(scn[1])
+            self.engine.air_density = float(scn[2])
+            self.engine.drag_coefficient = float(scn[3])
+            self.engine.friction = float(scn[4])
+            self.engine.floor = int(scn[5])
+            self.engine.dt = float(scn[6])
+            self.engine.gravitational_constant = float(scn[7])
+            self.engine.sim_type = str(scn[8])
 
-        self.engine.objects = final_objects
+            self.engine.objects = final_objects
+        except:
+            if os.path.exists("Scenes/main.scene"):
+                print("Save file corrupted or missing, file will be deleted.")
+                if os.path.exists("Scenes/main.scene"):
+                    os.remove("Scenes/main.scene")
+                    print("Corrupted scene succesfully deleted")
+                    print("Try saving a new scene")
+                else:
+                    print("The scene does not exist")
