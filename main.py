@@ -23,6 +23,8 @@ while engine.looping:
     ui.object_spawning()
     scene_manager.update()
 
+    cam.update()
+
     engine.main_loop()
     ui.update_stats(start)
     profiler.update_profiler()

@@ -69,7 +69,8 @@ class EngineCore:
         start = 0
         self.screen.fill("black")
         if self.sim_type == "Basic":
-            pygame.draw.line(self.screen, "white", (0, self.floor), (1280, self.floor), 5)
+            floor = self.cam.ws_to_ss_vec((0, self.floor))
+            pygame.draw.line(self.screen, "white", (0, floor[1]), (1280, floor[1]), 5)
 
         start = time.time()
         for draw_call in self.draw_calls:

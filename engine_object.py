@@ -10,7 +10,7 @@ class Object:
 
         self.cam = cam
 
-        self.ss_pos = cam.update_vector(self.pos)
+        self.ss_pos = cam.ws_to_ss_vec(self.pos)
 
         self.lock = lock
 
@@ -129,9 +129,9 @@ class Object:
             self.pos = self.pos + (self.vel * vec2(dt, dt))
 
     def render(self, screen):
-        self.ss_pos = self.cam.update_vector(self.pos)
+        self.ss_pos = self.cam.ws_to_ss_vec(self.pos)
 
-        pygame.draw.circle(screen, "white", (self.ss_pos.x, self.ss_pos.y), self.cam.update_num(self.radius))
+        pygame.draw.circle(screen, "white", (self.ss_pos.x, self.ss_pos.y), self.cam.ws_to_ss_num(self.radius))
 
 
 class Rectangle:
@@ -142,7 +142,7 @@ class Rectangle:
 
         self.cam = cam
 
-        self.ss_pos = cam.update_vector(self.pos)
+        self.ss_pos = cam.ws_to_ss_vec(self.pos)
 
         self.lock = lock
 
@@ -314,8 +314,8 @@ class Rectangle:
             self.pos = self.pos + (self.vel * vec2(dt, dt))
     
     def render(self, screen):
-        self.ss_pos = self.cam.update_vector(self.pos)
-        ss_height = self.cam.update_num(self.height)
-        ss_width = self.cam.update_num(self.width)
+        self.ss_pos = self.cam.ws_to_ss_vec(self.pos)
+        ss_height = self.cam.ws_to_ss_num(self.height)
+        ss_width = self.cam.ws_to_ss_num(self.width)
 
         pygame.draw.rect(screen, "white", pygame.Rect(self.ss_pos.x - ss_width/2, self.ss_pos.y - ss_height/2, ss_width, ss_height))
