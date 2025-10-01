@@ -1,7 +1,6 @@
 from engine_object import recreate_object
 from engine_core import EngineCore
 import os
-import traceback
 
 class SceneManager:
     def __init__(self, engine: EngineCore):
@@ -73,7 +72,6 @@ class SceneManager:
 
             self.engine.objects = final_objects
         except Exception as e:
-            print(traceback.format_exc())
             if os.path.exists("Scenes/main.scene"):
                 print("Save file corrupted or missing, file will be deleted.")
                 if os.path.exists("Scenes/main.scene"):

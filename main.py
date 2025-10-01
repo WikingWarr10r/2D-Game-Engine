@@ -14,9 +14,6 @@ profiler = ProfilerUI(engine, vec2(30, 30))
 
 scene_manager = SceneManagerUI(engine, vec2(30, 625), ui)
 
-engine.add_rect(vec2(200, 50), vec2(500, 0), 100, 50, False)
-engine.add_rect(vec2(150, 150), vec2(500, 0), 100, 50, False)
-
 while engine.looping:
     start = time.time()
     ui.update_simulation()
