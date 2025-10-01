@@ -1,8 +1,9 @@
 from engine_object import Object
+from engine_core import EngineCore
 import os
 
 class SceneManager:
-    def __init__(self, engine):
+    def __init__(self, engine: EngineCore):
         self.engine = engine
 
         self.objects = []
@@ -57,7 +58,7 @@ class SceneManager:
             objects = objs.split("#")
             final_objects = []
             for stored_obj in objects:
-                final_objects.append(Object.recreate_obj(stored_obj))
+                final_objects.append(Object.recreate_obj(stored_obj, self.engine.cam))
 
             self.engine.gravity = int(scn[0])
             self.engine.bounciness = float(scn[1])

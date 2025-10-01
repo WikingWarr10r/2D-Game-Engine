@@ -23,7 +23,7 @@ class Object:
         return f"{self.pos.x},{self.pos.y} {self.initial_pos.x},{self.initial_pos.y} {self.vel.x},{self.vel.y} {self.lock} {self.radius} {self.mass}"
 
     @staticmethod
-    def recreate_obj(stored):
+    def recreate_obj(stored, camera):
         parts = stored.split(" ")
         pos_x, pos_y = map(float, parts[0].split(","))
         init_x, init_y = map(float, parts[1].split(","))
@@ -32,7 +32,7 @@ class Object:
         radius = float(parts[4])
         mass = float(parts[5])
 
-        obj = Object(vec2(pos_x, pos_y), vec2(vel_x, vel_y), radius, lock)
+        obj = Object(vec2(pos_x, pos_y), vec2(vel_x, vel_y), radius, camera, lock)
         obj.initial_pos = vec2(init_x, init_y)
         obj.mass = mass
         return obj

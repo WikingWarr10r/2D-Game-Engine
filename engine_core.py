@@ -82,7 +82,10 @@ class EngineCore:
                 self.future_positions = self.predict_future()
             for obj in self.future_positions:
                 if len(obj) > 2:
-                    pygame.draw.lines(self.screen, (255, 122, 122, 122), False, obj)
+                    ss_obj = []
+                    for point in obj:
+                        ss_obj.append(self.cam.ws_to_ss_vec(point))
+                    pygame.draw.lines(self.screen, (255, 122, 122, 122), False, ss_obj)
         
         self.draw_call_render_time = time.time() - start
 
