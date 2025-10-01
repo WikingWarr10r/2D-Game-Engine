@@ -2,7 +2,9 @@ import os, shutil, re
 
 print("Searching for Dependencies")
 
-basic_setup = """from Dependencies.engine_core import *
+basic_setup = """import os
+os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
+from Dependencies.engine_core import *
 from Dependencies.scene_manager import SceneManager
 from Dependencies.camera import Camera
 
@@ -12,7 +14,9 @@ cam = Camera(vec2(0,0), 1)
 engine.add_camera(cam)
 
 scene_manager = SceneManager(engine)
-scene_manager.load()
+scene_manager.load("main.scene")
+
+engine.dt = 1/60
 
 while engine.looping:
     cam.update()
