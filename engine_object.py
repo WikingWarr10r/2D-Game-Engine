@@ -20,11 +20,10 @@ class Object:
         self.mass = (pi * radius * radius) * self.density
 
     def store(self):
-        return f"{self.pos.x},{self.pos.y} {self.initial_pos.x},{self.initial_pos.y} {self.vel.x},{self.vel.y} {self.lock} {self.radius} {self.mass}"
+        return f"Circle {self.pos.x},{self.pos.y} {self.initial_pos.x},{self.initial_pos.y} {self.vel.x},{self.vel.y} {self.lock} {self.radius} {self.mass}"
 
     @staticmethod
-    def recreate_obj(stored, camera):
-        parts = stored.split(" ")
+    def recreate_obj(parts, camera):
         pos_x, pos_y = map(float, parts[0].split(","))
         init_x, init_y = map(float, parts[1].split(","))
         vel_x, vel_y = map(float, parts[2].split(","))
@@ -153,11 +152,10 @@ class Rectangle:
         self.mass = (width * height) * self.density
 
     def store(self):
-        return f"{self.pos.x},{self.pos.y} {self.initial_pos.x},{self.initial_pos.y} {self.vel.x},{self.vel.y} {self.lock} {self.width} {self.height} {self.mass}"
+        return f"Rect {self.pos.x},{self.pos.y} {self.initial_pos.x},{self.initial_pos.y} {self.vel.x},{self.vel.y} {self.lock} {self.width} {self.height} {self.mass}"
 
     @staticmethod
-    def recreate_obj(stored):
-        parts = stored.split(" ")
+    def recreate_obj(parts, camera):
         pos_x, pos_y = map(float, parts[0].split(","))
         init_x, init_y = map(float, parts[1].split(","))
         vel_x, vel_y = map(float, parts[2].split(","))
@@ -166,7 +164,7 @@ class Rectangle:
         height = float(parts[5])
         mass = float(parts[6])
 
-        obj = Rectangle(vec2(pos_x, pos_y), vec2(vel_x, vel_y), width, height, lock)
+        obj = Rectangle(vec2(pos_x, pos_y), vec2(vel_x, vel_y), width, height, camera, lock)
         obj.initial_pos = vec2(init_x, init_y)
         obj.mass = mass
         return obj
@@ -176,7 +174,6 @@ class Rectangle:
             return (abs(self.pos.x - other.pos.x) < (self.width/2 + other.width/2) and
                     abs(self.pos.y - other.pos.y) < (self.height/2 + other.height/2))
 
-        # Circle (Object) collision
         elif hasattr(other, "radius"):
             closest_x = max(self.pos.x - self.width/2,
                             min(other.pos.x, self.pos.x + self.width/2))
@@ -219,7 +216,7 @@ class Rectangle:
                     self.pos.y -= shift/2
                     other.pos.y += shift/2
 
-        elif hasattr(other, "radius"):  # Circle overlap
+        elif hasattr(other, "radius"):
             delta = vec2(other.pos.x - self.pos.x, other.pos.y - self.pos.y)
             clamped_x = max(-self.width/2, min(delta.x, self.width/2))
             clamped_y = max(-self.height/2, min(delta.y, self.height/2))
@@ -255,7 +252,7 @@ class Rectangle:
                      vec2(-1, 0) if overlap_x < overlap_y else \
                      vec2(0, 1) if delta.y > 0 else vec2(0, -1)
 
-        elif hasattr(other, "radius"):  # Circle response
+        elif hasattr(other, "radius"):
             delta = other.pos - self.pos
             dist = max(0.0001, (delta.x**2 + delta.y**2)**0.5)
             normal = delta * (1/dist)
@@ -319,3 +316,14 @@ class Rectangle:
         ss_width = self.cam.ws_to_ss_num(self.width)
 
         pygame.draw.rect(screen, "white", pygame.Rect(self.ss_pos.x - ss_width/2, self.ss_pos.y - ss_height/2, ss_width, ss_height))
+
+def recreate_object(stored, camera):
+    parts = stored.split(" ")
+    obj_type = parts.pop(0)
+    if obj_type == "Circle":
+        return Object.recreate_obj(parts, camera)
+    elif obj_type == "Rect":
+        return Rectangle.recreate_obj(parts, camera)
+    else:
+        print("Invalid Object Type")
+        raise TypeError

@@ -1,6 +1,7 @@
-from engine_object import Object
+from engine_object import recreate_object
 from engine_core import EngineCore
 import os
+import traceback
 
 class SceneManager:
     def __init__(self, engine: EngineCore):
@@ -58,7 +59,7 @@ class SceneManager:
             objects = objs.split("#")
             final_objects = []
             for stored_obj in objects:
-                final_objects.append(Object.recreate_obj(stored_obj, self.engine.cam))
+                final_objects.append(recreate_object(stored_obj, self.engine.cam))
 
             self.engine.gravity = int(scn[0])
             self.engine.bounciness = float(scn[1])
@@ -71,7 +72,8 @@ class SceneManager:
             self.engine.sim_type = str(scn[8])
 
             self.engine.objects = final_objects
-        except:
+        except Exception as e:
+            print(traceback.format_exc())
             if os.path.exists("Scenes/main.scene"):
                 print("Save file corrupted or missing, file will be deleted.")
                 if os.path.exists("Scenes/main.scene"):
