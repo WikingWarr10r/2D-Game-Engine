@@ -430,22 +430,22 @@ class Rectangle:
                 self.vel.x *= friction
 
                 r = corner - self.pos
-                torque = -r.x * self.mass * 0.5
+                torque = -r.x * self.mass * 5
                 self.add_torque(torque)
 
-                self.ang_vel *= 0.9
+                self.ang_vel *= 0.7
 
             if corner.x < 0:
                 depth = -corner.x
                 self.pos.x += depth
                 self.vel.x = -self.vel.x * bounciness
-                self.ang_vel *= 0.9
+                self.ang_vel *= 0.7
 
             if corner.x > 1280:
                 depth = corner.x - 1280
                 self.pos.x -= depth
                 self.vel.x = -self.vel.x * bounciness
-                self.ang_vel *= 0.9
+                self.ang_vel *= 0.7
 
     def add_force(self, v: vec2):
         self.vel = self.vel + v
@@ -459,16 +459,40 @@ class Rectangle:
     def update(self, gravity, bounciness, air_density, drag_coefficient, friction, floor, dt, simulation_type):
         if self.lock:
             return
-        if simulation_type == "Basic":
-            if dt == 0:
-                return
-            self.pos = self.pos + self.vel * dt
-            self.vel = self.vel + vec2(0, gravity * (dt * 60))
-            self.vel = self.vel + self.vel * (-drag_coefficient * air_density * dt)
-            self.ang_vel *= (1 - 0.01 * drag_coefficient * air_density)
-            self.collide(floor, bounciness, friction)
-        elif simulation_type == "Newtonian Gravity":
-            self.pos = self.pos + self.vel * dt
+
+        self.vel += vec2(0, gravity * dt * 60)
+        self.pos += self.vel * dt
+
+        self.vel *= (1 - drag_coefficient * air_density * dt)
+        self.ang_vel *= (1 - 0.01 * drag_coefficient * air_density)
+
+        half_w = self.width * 0.5
+        half_h = self.height * 0.5
+        cos_a = math.cos(self.angle)
+        sin_a = math.sin(self.angle)
+        corners = [
+            vec2(-half_w, -half_h),
+            vec2( half_w, -half_h),
+            vec2( half_w,  half_h),
+            vec2(-half_w,  half_h),
+        ]
+        world_corners = [self.pos + vec2(c.x*cos_a - c.y*sin_a,
+                                        c.x*sin_a + c.y*cos_a)
+                        for c in corners]
+
+        for corner in world_corners:
+            if corner.y > floor:
+                depth = corner.y - floor
+                self.pos.y -= depth
+                self.vel.y = -self.vel.y * bounciness
+                self.vel.x *= friction
+
+                r = corner - self.pos
+                torque = -r.x * self.mass * 5
+                self.add_torque(torque)
+
+                self.ang_vel *= 0.7
+
         self.angle += self.ang_vel * dt
 
     def render(self, screen):
