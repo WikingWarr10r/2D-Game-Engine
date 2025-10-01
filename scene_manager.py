@@ -45,10 +45,10 @@ class SceneManager:
             scene.write(generated_scene)
         scene.close()
 
-    def load(self):
+    def load(self, file):
         try:
             generated_scene = ""
-            with open("Scenes/main.scene", "r") as scene:
+            with open(f"Scenes/{file}", "r") as scene:
                 generated_scene = scene.readline()
             scene.close()
             scn = generated_scene.split("~")

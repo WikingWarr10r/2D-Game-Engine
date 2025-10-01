@@ -184,12 +184,13 @@ class UIVec2:
 
 class UIChoice:
     def __init__(self, values, pos, label, font):
-        self.value = values[0]
         self.potential_values = values
+        self.index = 0
+        self.value = values[self.index]
         self.pos = pos
         self.label = label
         self.font = font
-        self.width = 80
+        self.width = 100
         self.height = 20
 
     def render(self, screen):
@@ -201,22 +202,25 @@ class UIChoice:
 
         text_surf = self.font.render(self.label, True, (255, 255, 255))
         screen.blit(text_surf, (self.pos.x + 5 + self.width, self.pos.y + (self.height - text_surf.get_height()) / 2))
-    
+
     def handle_event(self, event):
         if event.type == pygame.MOUSEWHEEL:
             mouse_pos = vec2(*pygame.mouse.get_pos())
-            if (self.pos.x <= mouse_pos.x <= self.pos.x + self.width and self.pos.y <= mouse_pos.y <= self.pos.y + self.height):
-                scroll = event.y
-                scroll = max(scroll, 0)
-                scroll = min(scroll, 1)
-                self.value = self.potential_values[scroll]
+            if (self.pos.x <= mouse_pos.x <= self.pos.x + self.width and
+                self.pos.y <= mouse_pos.y <= self.pos.y + self.height):
+
+                self.index -= event.y
+                self.index = max(0, min(self.index, len(self.potential_values) - 1))
+                self.value = self.potential_values[self.index]
 
     def set_value(self, index):
-        self.value = self.potential_values[index]
+        if 0 <= index < len(self.potential_values):
+            self.index = index
+            self.value = self.potential_values[index]
 
     def get_value(self):
         return self.value
-    
+
 class UIPieChart:
     def __init__(self, pos, radius, colors=None, font=None):
         self.pos = pos

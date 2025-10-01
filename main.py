@@ -12,7 +12,7 @@ engine.add_camera(cam)
 ui = PhysicsUI(engine, vec2(950, 30))
 profiler = ProfilerUI(engine, vec2(30, 30))
 
-scene_manager = SceneManagerUI(engine, vec2(30, 625), ui)
+scene_manager = SceneManagerUI(engine, vec2(30, 615), ui)
 
 while engine.looping:
     start = time.time()
