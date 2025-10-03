@@ -69,9 +69,8 @@ class EngineCore:
         start = 0
         self.screen.fill("black")
         if self.sim_type == "Basic":
-            floor = self.cam.ws_to_ss_vec((0, self.floor))
-            pygame.draw.line(self.screen, "white", (0, floor[1]), (1280, floor[1]), 5)
-
+            floor_rect = Rectangle(vec2(0, self.floor), vec2(), 2000, 50, self.cam, True)
+            floor_rect.render(self.screen)
         start = time.time()
         for draw_call in self.draw_calls:
             draw_call()
@@ -110,10 +109,12 @@ class EngineCore:
             for ui in self.ui:
                 ui.handle_event(event)
         self.event_handle_time = time.time() - start
+
+        floor_rect = Rectangle(vec2(0, self.floor), vec2(), 2000, 50, self.cam, True)
         
         start = time.time()
         for obj in self.objects:
-            obj.update(self.gravity, self.bounciness, self.air_density, self.drag_coefficient, self.friction, self.floor, self.dt, self.sim_type)
+            obj.update(self.gravity, self.bounciness, self.air_density, self.drag_coefficient, self.friction, floor_rect, self.dt, self.sim_type)
         self.obj_update_time = time.time() - start
 
         start = time.time()
@@ -234,8 +235,10 @@ class EngineCore:
                     positions[i].append((a.pos.x, a.pos.y))
                     positions[j].append((b.pos.x, b.pos.y))
 
+            floor_rect = Rectangle(vec2(0, self.floor), vec2(), 2000, 50, self.cam, True)
+            
             for obj in objs:
-                obj.update(self.gravity, self.bounciness, self.air_density, self.drag_coefficient, self.friction, self.floor, 1/60, self.sim_type)
+                obj.update(self.gravity, self.bounciness, self.air_density, self.drag_coefficient, self.friction, floor_rect, self.floor, 1/60, self.sim_type)
 
         return positions
     
