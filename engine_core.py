@@ -69,7 +69,7 @@ class EngineCore:
         start = 0
         self.screen.fill("black")
         if self.sim_type == "Basic":
-            floor_rect = Rectangle(vec2(0, self.floor), vec2(), 2000, 50, self.cam, True)
+            floor_rect = Rectangle(vec2(0, self.floor), vec2(), 2000, 200, self.cam, True)
             floor_rect.render(self.screen)
         start = time.time()
         for draw_call in self.draw_calls:
@@ -110,11 +110,22 @@ class EngineCore:
                 ui.handle_event(event)
         self.event_handle_time = time.time() - start
 
-        floor_rect = Rectangle(vec2(0, self.floor), vec2(), 2000, 50, self.cam, True)
+        floor_rect = Rectangle(vec2(0, self.floor), vec2(), 2000, 200, self.cam, True)
         
         start = time.time()
-        for obj in self.objects:
-            obj.update(self.gravity, self.bounciness, self.air_density, self.drag_coefficient, self.friction, floor_rect, self.dt, self.sim_type)
+        steps = 4
+        sub_dt = self.dt / steps
+
+        for _ in range(steps):
+            for obj in self.objects:
+                obj.update(self.gravity, self.bounciness, self.air_density, self.drag_coefficient, self.friction, floor_rect, sub_dt, self.sim_type)
+            for i in range(len(self.objects)):
+                for j in range(i+1, len(self.objects)):
+                    a = self.objects[i]
+                    b = self.objects[j]
+                    if a.check_collision(b):
+                        a.resolve_overlap(b)
+                        a.collision_response(b)
         self.obj_update_time = time.time() - start
 
         start = time.time()
@@ -235,7 +246,7 @@ class EngineCore:
                     positions[i].append((a.pos.x, a.pos.y))
                     positions[j].append((b.pos.x, b.pos.y))
 
-            floor_rect = Rectangle(vec2(0, self.floor), vec2(), 2000, 50, self.cam, True)
+            floor_rect = Rectangle(vec2(0, self.floor), vec2(), 2000, 200, self.cam, True)
             
             for obj in objs:
                 obj.update(self.gravity, self.bounciness, self.air_density, self.drag_coefficient, self.friction, floor_rect, self.floor, 1/60, self.sim_type)

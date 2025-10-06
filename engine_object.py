@@ -55,8 +55,9 @@ class Object:
                 dist = 0.01
 
             overlap = (self.radius + other.radius) - dist
-            if overlap <= 0:
-                return
+            min_penetration = 0.01
+            if overlap < min_penetration:
+                overlap = min_penetration
 
             normal = vec2(delta.x / dist, delta.y / dist)
 
@@ -126,15 +127,15 @@ class Object:
     def add_force(self, vec):
         self.vel += vec
     
-    def update(self, gravity, bounciness, air_density, drag_coefficient, friction, floor_rect, dt, simulation_type):
+    def update(self, gravity, bounciness, air_density, drag_coefficient, friction, floor_rect, fixed_dt, simulation_type):
         if self.lock:
             return
 
         if simulation_type == "Basic":
-            if dt == 0:
+            if fixed_dt == 0:
                 return
-            self.pos = self.pos + (self.vel * vec2(dt, dt))
-            self.vel = self.vel + (vec2(0, gravity * (dt*60)))
+            self.pos = self.pos + (self.vel * vec2(fixed_dt, fixed_dt))
+            self.vel = self.vel + (vec2(0, gravity * (fixed_dt*60)))
             
             air_res = vec2(-0.5, -0.5) * vec2(air_density, air_density) * self.vel * vec2(drag_coefficient, drag_coefficient) * (2*pi*self.radius/2)
             self.add_force(air_res)
@@ -142,7 +143,7 @@ class Object:
             self.collide(floor_rect, bounciness, friction)
         
         elif simulation_type == "Newtonian Gravity":
-            self.pos = self.pos + (self.vel * vec2(dt, dt))
+            self.pos = self.pos + (self.vel * vec2(fixed_dt, fixed_dt))
 
     def render(self, screen):
         self.ss_pos = self.cam.ws_to_ss_vec(self.pos)
@@ -436,19 +437,19 @@ class Rectangle:
         ang_acc = torque / self.inertia if self.inertia != 0 else 0.0
         self.ang_vel += ang_acc
 
-    def update(self, gravity, bounciness, air_density, drag_coefficient, friction, floor_rect, dt, simulation_type):
+    def update(self, gravity, bounciness, air_density, drag_coefficient, friction, floor_rect, fixed_dt, simulation_type):
         if self.lock:
             return
 
-        self.vel += vec2(0, gravity * dt * 60)
-        self.pos += self.vel * dt
+        self.vel += vec2(0, gravity * fixed_dt * 60)
+        self.pos += self.vel * fixed_dt
 
-        self.vel *= (1 - drag_coefficient * air_density * dt)
+        self.vel *= (1 - drag_coefficient * air_density * fixed_dt)
         self.ang_vel *= (1 - 0.01 * drag_coefficient * air_density)
 
         self.collide(floor_rect, bounciness, friction)
 
-        self.angle += self.ang_vel * dt
+        self.angle += self.ang_vel * fixed_dt
 
     def render(self, screen):
         self.ss_pos = self.cam.ws_to_ss_vec(self.pos)
