@@ -37,113 +37,95 @@ class Object:
         return obj
 
     def check_collision(self, other):
-        if hasattr(other, "radius"):
-            distance = ((self.pos.x - other.pos.x) ** 2 + (self.pos.y - other.pos.y) ** 2) ** 0.5
-            return distance < (self.radius + other.radius)
-        elif isinstance(other, Rectangle):
-            verts = other.get_vertices()
-            pen, axis = sat_poly_circle(verts, self.pos, self.radius)
-            return pen is not None
-        else:
-            return False
-        
+        distance = ((self.pos.x - other.pos.x) ** 2 + (self.pos.y - other.pos.y) ** 2) ** 0.5
+        return distance < (self.radius + other.radius)
+    
     def resolve_overlap(self, other):
-        if hasattr(other, "radius"):
-            delta = vec2(other.pos.x - self.pos.x, other.pos.y - self.pos.y)
-            dist = (delta.x**2 + delta.y**2) ** 0.5
-            if dist == 0:
-                dist = 0.01
+        delta = vec2(other.pos.x - self.pos.x, other.pos.y - self.pos.y)
+        dist = (delta.x**2 + delta.y**2) ** 0.5
+        if dist == 0:
+            dist = 0.01
 
-            overlap = (self.radius + other.radius) - dist
-            min_penetration = 0.01
-            if overlap < min_penetration:
-                overlap = min_penetration
+        overlap = (self.radius + other.radius) - dist
+        if overlap <= 0:
+            return
 
-            normal = vec2(delta.x / dist, delta.y / dist)
+        normal = vec2(delta.x / dist, delta.y / dist)
 
-            if self.lock and other.lock:
-                return 
-            elif self.lock:
-                other.pos.x += normal.x * overlap
-                other.pos.y += normal.y * overlap
-            elif other.lock:
-                self.pos.x -= normal.x * overlap
-                self.pos.y -= normal.y * overlap
-            else:
-                self.pos.x -= normal.x * overlap / 2
-                self.pos.y -= normal.y * overlap / 2
-                other.pos.x += normal.x * overlap / 2
-                other.pos.y += normal.y * overlap / 2
-        elif isinstance(other, Rectangle):
-            pen, axis = other.compute_mtv(self)
-            if pen is None:
-                return
-            if self.lock and other.lock:
-                return
-            if self.lock:
-                other.pos = other.pos + axis * pen
-            elif other.lock:
-                self.pos = self.pos - axis * pen
-            else:
-                self.pos = self.pos - axis * (pen * 0.5)
-                other.pos = other.pos + axis * (pen * 0.5)
-  
+        if self.lock and other.lock:
+            return 
+        elif self.lock:
+            other.pos.x += normal.x * overlap
+            other.pos.y += normal.y * overlap
+        elif other.lock:
+            self.pos.x -= normal.x * overlap
+            self.pos.y -= normal.y * overlap
+        else:
+            self.pos.x -= normal.x * overlap / 2
+            self.pos.y -= normal.y * overlap / 2
+            other.pos.x += normal.x * overlap / 2
+            other.pos.y += normal.y * overlap / 2
+    
     def collision_response(self, other):
-        if self.lock and getattr(other, "lock", False):
+        if self.lock and other.lock:
             return 
 
-        if hasattr(other, "radius"):
-            delta = other.pos - self.pos
-            dist = (delta.x ** 2 + delta.y ** 2) ** 0.5
-            if dist == 0:
-                dist = 0.01
+        delta = other.pos - self.pos
+        dist = (delta.x ** 2 + delta.y ** 2) ** 0.5
+        if dist == 0:
+            dist = 0.01
 
-            normal = delta / vec2(dist, dist)
-            
-            relative_velocity = other.vel - self.vel
-            vel_along_normal = relative_velocity.x * normal.x + relative_velocity.y * normal.y
+        normal = delta / vec2(dist, dist)
+        
+        relative_velocity = other.vel - self.vel
+        vel_along_normal = relative_velocity.x * normal.x + relative_velocity.y * normal.y
 
-            if vel_along_normal > 0:
-                return
+        if vel_along_normal > 0:
+            return
 
-            restitution = 0.7
-            impulse_scalar = -(1 + restitution) * vel_along_normal
-            impulse_scalar /= (0 if self.lock else 1 / self.mass) + (0 if other.lock else 1 / other.mass)
+        restitution = 0.7
+        impulse_scalar = -(1 + restitution) * vel_along_normal
+        impulse_scalar /= (0 if self.lock else 1 / self.mass) + (0 if other.lock else 1 / other.mass)
 
-            impulse = normal * impulse_scalar
+        impulse = normal * impulse_scalar
 
-            if not self.lock:
-                self.vel = self.vel - impulse * (1 / self.mass)
-            if not other.lock:
-                other.vel = other.vel + impulse * (1 / other.mass)
-        elif isinstance(other, Rectangle):
-            other.collision_response(self)
+        if not self.lock:
+            self.vel = self.vel - impulse * (1 / self.mass)
+        if not other.lock:
+            other.vel = other.vel + impulse * (1 / other.mass)
 
-    def collide(self, floor_rect, bounciness, friction):
-        if self.check_collision(floor_rect):
-            self.resolve_overlap(floor_rect)
-            self.collision_response(floor_rect)
+    def collide(self, lower, bounciness, friction):
+        if self.pos.y > lower-self.radius:
+            self.pos.y = lower-self.radius
+            self.vel.y = -self.vel.y*bounciness
+            self.vel.x *= friction
+        if self.pos.x < 0 + self.radius:
+            self.pos.x = 0 + self.radius
+            self.vel.x *= -1
+        if self.pos.x > 1280 - self.radius:
+            self.pos.x = 1280 - self.radius
+            self.vel.x *= -1
 
     def add_force(self, vec):
         self.vel += vec
     
-    def update(self, gravity, bounciness, air_density, drag_coefficient, friction, floor_rect, fixed_dt, simulation_type):
+    def update(self, gravity, bounciness, air_density, drag_coefficient, friction, floor, dt, simulation_type):
         if self.lock:
             return
 
         if simulation_type == "Basic":
-            if fixed_dt == 0:
+            if dt == 0:
                 return
-            self.pos = self.pos + (self.vel * vec2(fixed_dt, fixed_dt))
-            self.vel = self.vel + (vec2(0, gravity * (fixed_dt*60)))
+            self.pos = self.pos + (self.vel * vec2(dt, dt))
+            self.vel = self.vel + (vec2(0, gravity * (dt*60)))
             
             air_res = vec2(-0.5, -0.5) * vec2(air_density, air_density) * self.vel * vec2(drag_coefficient, drag_coefficient) * (2*pi*self.radius/2)
             self.add_force(air_res)
 
-            self.collide(floor_rect, bounciness, friction)
+            self.collide(floor, bounciness, friction)
         
         elif simulation_type == "Newtonian Gravity":
-            self.pos = self.pos + (self.vel * vec2(fixed_dt, fixed_dt))
+            self.pos = self.pos + (self.vel * vec2(dt, dt))
 
     def render(self, screen):
         self.ss_pos = self.cam.ws_to_ss_vec(self.pos)
@@ -423,10 +405,47 @@ class Rectangle:
                 if hasattr(other, "ang_vel"):
                     other.ang_vel += rB.cross(tang_imp) * invInertiaB
 
-    def collide(self, floor_rect, bounciness, friction):
-        if self.check_collision(floor_rect):
-            self.resolve_overlap(floor_rect)
-            self.collision_response(floor_rect)
+    def collide(self, lower, bounciness, friction):
+        half_w = self.width * 0.5
+        half_h = self.height * 0.5
+
+        cos_a = math.cos(self.angle)
+        sin_a = math.sin(self.angle)
+
+        corners = [
+            vec2(-half_w, -half_h),
+            vec2( half_w, -half_h),
+            vec2( half_w,  half_h),
+            vec2(-half_w,  half_h),
+        ]
+        world_corners = [self.pos + vec2(c.x*cos_a - c.y*sin_a,
+                                        c.x*sin_a + c.y*cos_a)
+                        for c in corners]
+
+        for corner in world_corners:
+            if corner.y > lower:
+                depth = corner.y - lower
+                self.pos.y -= depth
+                self.vel.y = -self.vel.y * bounciness
+                self.vel.x *= friction
+
+                r = corner - self.pos
+                torque = -r.x * self.mass * 5
+                self.add_torque(torque)
+
+                self.ang_vel *= 0.7
+
+            if corner.x < 0:
+                depth = -corner.x
+                self.pos.x += depth
+                self.vel.x = -self.vel.x * bounciness
+                self.ang_vel *= 0.7
+
+            if corner.x > 1280:
+                depth = corner.x - 1280
+                self.pos.x -= depth
+                self.vel.x = -self.vel.x * bounciness
+                self.ang_vel *= 0.7
 
     def add_force(self, v: vec2):
         self.vel = self.vel + v
@@ -437,19 +456,44 @@ class Rectangle:
         ang_acc = torque / self.inertia if self.inertia != 0 else 0.0
         self.ang_vel += ang_acc
 
-    def update(self, gravity, bounciness, air_density, drag_coefficient, friction, floor_rect, fixed_dt, simulation_type):
+    def update(self, gravity, bounciness, air_density, drag_coefficient, friction, floor, dt, simulation_type):
         if self.lock:
             return
 
-        self.vel += vec2(0, gravity * fixed_dt * 60)
-        self.pos += self.vel * fixed_dt
+        self.vel += vec2(0, gravity * dt * 60)
+        self.pos += self.vel * dt
 
-        self.vel *= (1 - drag_coefficient * air_density * fixed_dt)
+        self.vel *= (1 - drag_coefficient * air_density * dt)
         self.ang_vel *= (1 - 0.01 * drag_coefficient * air_density)
 
-        self.collide(floor_rect, bounciness, friction)
+        half_w = self.width * 0.5
+        half_h = self.height * 0.5
+        cos_a = math.cos(self.angle)
+        sin_a = math.sin(self.angle)
+        corners = [
+            vec2(-half_w, -half_h),
+            vec2( half_w, -half_h),
+            vec2( half_w,  half_h),
+            vec2(-half_w,  half_h),
+        ]
+        world_corners = [self.pos + vec2(c.x*cos_a - c.y*sin_a,
+                                        c.x*sin_a + c.y*cos_a)
+                        for c in corners]
 
-        self.angle += self.ang_vel * fixed_dt
+        for corner in world_corners:
+            if corner.y > floor:
+                depth = corner.y - floor
+                self.pos.y -= depth
+                self.vel.y = -self.vel.y * bounciness
+                self.vel.x *= friction
+
+                r = corner - self.pos
+                torque = -r.x * self.mass * 5
+                self.add_torque(torque)
+
+                self.ang_vel *= 0.7
+
+        self.angle += self.ang_vel * dt
 
     def render(self, screen):
         self.ss_pos = self.cam.ws_to_ss_vec(self.pos)
