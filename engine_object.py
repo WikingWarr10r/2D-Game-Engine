@@ -508,7 +508,7 @@ class Rectangle:
                 torque = -r.x * self.mass * 5
                 self.add_torque(torque)
 
-                #self.ang_vel *= 0.7
+                self.ang_vel *= 0.9
 
         self.angle += self.ang_vel * dt
 
