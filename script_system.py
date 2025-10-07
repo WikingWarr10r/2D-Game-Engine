@@ -88,3 +88,10 @@ class ScriptSystem:
 
     def attach_to_object(self, script, obj):
         self.modules[self.scripts.index(script)].obj = obj
+
+    def detach_from_object(self, script):
+        self.modules[self.scripts.index(script)].obj = None
+
+    def detach_all_scripts(self):
+        for script in self.modules:
+            script.obj = None
