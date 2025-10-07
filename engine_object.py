@@ -51,7 +51,6 @@ class Object:
             return
 
         normal = vec2(delta.x / dist, delta.y / dist)
-
         if self.lock and other.lock:
             return 
         elif self.lock:
@@ -79,14 +78,14 @@ class Object:
         
         relative_velocity = other.vel - self.vel
         vel_along_normal = relative_velocity.x * normal.x + relative_velocity.y * normal.y
-
+        normal = delta / vec2(dist, dist)
         if vel_along_normal > 0:
             return
 
         restitution = 0.7
         impulse_scalar = -(1 + restitution) * vel_along_normal
         impulse_scalar /= (0 if self.lock else 1 / self.mass) + (0 if other.lock else 1 / other.mass)
-
+        impulse = normal * impulse_scalar
         impulse = normal * impulse_scalar
 
         if not self.lock:
@@ -428,37 +427,26 @@ class Rectangle:
             if corner.y > lower:
                 depth = corner.y - lower
                 self.pos.y -= depth
+                self.vel.y = -self.vel.y * bounciness
+                self.vel.x *= friction
 
                 r = corner - self.pos
+                torque = -r.x * self.mass * 5
+                self.add_torque(torque)
 
-                normal = vec2(0, 1)
-                rel_vel = self.vel + vec2.cross_scalar_vec(self.ang_vel, r)
+                self.ang_vel *= 0.7
 
-                vel_along_normal = rel_vel.dot(normal)
-                if vel_along_normal < 0:
-                    restitution = bounciness
-                    impulse_mag = -(1 + restitution) * vel_along_normal
-                    denom = (1 / self.mass) + ((r.cross(normal) ** 2) / self.inertia)
-                    if denom != 0:
-                        impulse_mag /= denom
-                        impulse = normal * impulse_mag
+            if corner.x < 0:
+                depth = -corner.x
+                self.pos.x += depth
+                self.vel.x = -self.vel.x * bounciness
+                self.ang_vel *= 0.7
 
-                        self.vel += impulse * (1 / self.mass)
-
-                        self.ang_vel += r.cross(impulse) / self.inertia
-
-                tangent = rel_vel - normal * rel_vel.dot(normal)
-                tlen = tangent.length()
-                if tlen > 1e-6:
-                    tdir = tangent.normalized()
-                    mu = friction
-                    jt = -rel_vel.dot(tdir)
-                    jt /= denom
-                    jt = max(-impulse_mag * mu, min(impulse_mag * mu, jt))
-                    tang_imp = tdir * jt
-
-                    self.vel += tang_imp * (1 / self.mass)
-                    self.ang_vel += r.cross(tang_imp) / self.inertia
+            if corner.x > 1280:
+                depth = corner.x - 1280
+                self.pos.x -= depth
+                self.vel.x = -self.vel.x * bounciness
+                self.ang_vel *= 0.7
 
     def add_force(self, v: vec2):
         self.vel = self.vel + v
@@ -476,10 +464,7 @@ class Rectangle:
         self.vel += vec2(0, gravity * dt * 60)
         self.pos += self.vel * dt
 
-        if self.lock_angle:
-            self.angle = 0
-            self.ang_vel = 0
-
+        self.vel *= (1 - drag_coefficient * air_density * dt)
         self.vel *= (1 - drag_coefficient * air_density * dt)
         self.ang_vel *= (1 - 0.01 * drag_coefficient * air_density)
 
@@ -508,7 +493,7 @@ class Rectangle:
                 torque = -r.x * self.mass * 5
                 self.add_torque(torque)
 
-                self.ang_vel *= 0.9
+                self.ang_vel *= 0.7
 
         self.angle += self.ang_vel * dt
 
