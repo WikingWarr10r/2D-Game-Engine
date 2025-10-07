@@ -1,8 +1,13 @@
 import os, shutil, re
 
+print("Potential Scenes: ")
+for scene in os.listdir("Scenes/"):
+    print(scene)
+scene = input("Enter Scene to load: ")
+
 print("Searching for Dependencies")
 
-basic_setup = """import os
+basic_setup = f"""import os
 os.environ["PYGAME_HIDE_SUPPORT_PROMPT"] = "1"
 from Dependencies.engine_core import *
 from Dependencies.scene_manager import SceneManager
@@ -14,7 +19,7 @@ cam = Camera(vec2(0,0), 1)
 engine.add_camera(cam)
 
 scene_manager = SceneManager(engine)
-scene_manager.load("main.scene")
+scene_manager.load("{scene}.scene")
 
 engine.dt = 1/60
 
