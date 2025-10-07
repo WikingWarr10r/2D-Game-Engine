@@ -4,7 +4,7 @@ from engine_object import Object, Rectangle
 import pygame
 
 class InspectorUI:
-    def __init__(self, engine, pos, obj):
+    def __init__(self, engine, pos, obj=None):
         self.engine = engine
         self.ui = UIObject("Inspector", pos, 300, 200, engine)
         self.obj = obj
