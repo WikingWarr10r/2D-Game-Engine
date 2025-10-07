@@ -1,7 +1,8 @@
 # Init function called once at the beginning
-def init():
+def init(obj):
     pass
 
 # Update function called every frame
-def update():
-    print("Hello World")
+def update(obj):
+    if not obj == None:
+        print(obj.pos)
