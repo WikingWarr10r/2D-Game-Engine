@@ -1,8 +1,10 @@
 from engine_core import *
+from camera import Camera
+
 from physics_ui import PhysicsUI
 from profiler_ui import ProfilerUI
 from scene_manager_ui import SceneManagerUI
-from camera import Camera
+from object_inspector import InspectorUI
 
 engine = EngineCore()
 
@@ -14,11 +16,14 @@ profiler = ProfilerUI(engine, vec2(30, 30))
 
 scene_manager = SceneManagerUI(engine, vec2(30, 615), ui)
 
+inspector = InspectorUI(engine, vec2(30, 320), None)
+
 while engine.looping:
     start = time.time()
     ui.update_simulation()
     ui.object_spawning()
     scene_manager.update()
+    inspector.update()
 
     cam.update()
 

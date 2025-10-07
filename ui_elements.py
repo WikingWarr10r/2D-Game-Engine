@@ -145,7 +145,7 @@ class UIVec2:
 
         rect_x = pygame.Rect(x_start, self.pos.y, self.box_width, self.box_height)
         pygame.draw.rect(screen, (150, 30, 30), rect_x, border_radius=3)
-        text_x = self.font.render(str(self.value.x), True, (255, 255, 255))
+        text_x = self.font.render(str(int(self.value.x)), True, (255, 255, 255))
         screen.blit(text_x, (x_start + (self.box_width - text_x.get_width()) / 2, self.pos.y + (self.box_height - text_x.get_height()) / 2))
         x_start += self.box_width + self.spacing
 
@@ -155,7 +155,7 @@ class UIVec2:
 
         rect_y = pygame.Rect(x_start, self.pos.y, self.box_width, self.box_height)
         pygame.draw.rect(screen, (150, 30, 30), rect_y, border_radius=3)
-        text_y = self.font.render(str(self.value.y), True, (255, 255, 255))
+        text_y = self.font.render(str(int(self.value.y)), True, (255, 255, 255))
         screen.blit(text_y, (x_start + (self.box_width - text_y.get_width()) / 2, self.pos.y + (self.box_height - text_y.get_height()) / 2))
         x_start += self.box_width + self.spacing
 

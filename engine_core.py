@@ -65,6 +65,11 @@ class EngineCore:
     def draw_line(self, start, end, colour=(255, 255, 255, 122), thickness=1):
         self.draw_calls.append(lambda: pygame.draw.line(self.screen, colour, (start.x, start.y), (end.x, end.y), thickness))
 
+    def draw_rect(self, centre, width, height, colour=(255, 255, 255, 122)):
+        x = centre.x - width / 2
+        y = centre.y - height / 2
+        self.draw_calls.append(lambda: pygame.draw.rect(self.screen, colour, (x, y, width, height)))
+
     def render(self):
         start = 0
         self.screen.fill("black")
@@ -241,3 +246,24 @@ class EngineCore:
     
     def add_camera(self, cam):
         self.cam = cam
+
+    def find_closest_obj(self, point):
+        closest_dist = math.inf
+        closest_obj = None
+
+        for obj in self.objects:
+            if (obj.pos-point).length() < closest_dist:
+                closest_dist = (obj.pos-point).length()
+                closest_obj = obj
+
+        return closest_obj
+    
+    def mouse_over_ui(self):
+        mouse_pos = pygame.mouse.get_pos()
+        mx, my = mouse_pos
+
+        for ui_obj in self.ui:
+            if (ui_obj.pos.x <= mx <= ui_obj.pos.x + ui_obj.width and
+                ui_obj.pos.y <= my <= ui_obj.pos.y + ui_obj.height):
+                return True
+        return False
