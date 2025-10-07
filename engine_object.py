@@ -231,13 +231,14 @@ def sat_poly_circle(verts, center: vec2, radius: float):
     return smallest_pen, smallest_axis
 
 class Rectangle:
-    def __init__(self, pos: vec2, vel: vec2, width, height, cam, lock=False, angle=0.0, ang_vel=0.0):
+    def __init__(self, pos: vec2, vel: vec2, width, height, cam, lock=False, lock_angle=False, angle=0.0, ang_vel=0.0):
         self.pos = pos
         self.initial_pos = vec2(pos.x, pos.y)
         self.vel = vel
         self.cam = cam
         self.ss_pos = cam.ws_to_ss_vec(self.pos)
         self.lock = lock
+        self.lock_angle = lock_angle
         self.density = 0.0014147106
         self.width = width
         self.height = height
@@ -247,7 +248,7 @@ class Rectangle:
         self.inertia = self.mass * (self.width*self.width + self.height*self.height) / 12.0 if self.mass != 0 else float('inf')
 
     def store(self):
-        return f"Rect {self.pos.x},{self.pos.y} {self.initial_pos.x},{self.initial_pos.y} {self.vel.x},{self.vel.y} {self.lock} {self.width} {self.height} {self.mass} {self.angle} {self.ang_vel}"
+        return f"Rect {self.pos.x},{self.pos.y} {self.initial_pos.x},{self.initial_pos.y} {self.vel.x},{self.vel.y} {self.lock} {self.lock_angle} {self.width} {self.height} {self.mass} {self.angle} {self.ang_vel}"
 
     @staticmethod
     def recreate_obj(parts, camera):
@@ -255,12 +256,13 @@ class Rectangle:
         init_x, init_y = map(float, parts[1].split(","))
         vel_x, vel_y = map(float, parts[2].split(","))
         lock = parts[3] == "True"
-        width = float(parts[4])
-        height = float(parts[5])
-        mass = float(parts[6])
-        angle = float(parts[7]) if len(parts) > 7 else 0.0
-        ang_vel = float(parts[8]) if len(parts) > 8 else 0.0
-        obj = Rectangle(vec2(pos_x, pos_y), vec2(vel_x, vel_y), width, height, camera, lock, angle, ang_vel)
+        lock_angle = parts[4] == "True"
+        width = float(parts[5])
+        height = float(parts[6])
+        mass = float(parts[7])
+        angle = float(parts[8]) if len(parts) > 7 else 0.0
+        ang_vel = float(parts[9]) if len(parts) > 8 else 0.0
+        obj = Rectangle(vec2(pos_x, pos_y), vec2(vel_x, vel_y), width, height, camera, lock, lock_angle, angle, ang_vel)
         obj.initial_pos = vec2(init_x, init_y)
         obj.mass = mass
         obj.inertia = obj.mass * (obj.width*obj.width + obj.height*obj.height) / 12.0 if obj.mass != 0 else float('inf')
@@ -426,26 +428,37 @@ class Rectangle:
             if corner.y > lower:
                 depth = corner.y - lower
                 self.pos.y -= depth
-                self.vel.y = -self.vel.y * bounciness
-                self.vel.x *= friction
 
                 r = corner - self.pos
-                torque = -r.x * self.mass * 5
-                self.add_torque(torque)
 
-                self.ang_vel *= 0.7
+                normal = vec2(0, 1)
+                rel_vel = self.vel + vec2.cross_scalar_vec(self.ang_vel, r)
 
-            if corner.x < 0:
-                depth = -corner.x
-                self.pos.x += depth
-                self.vel.x = -self.vel.x * bounciness
-                self.ang_vel *= 0.7
+                vel_along_normal = rel_vel.dot(normal)
+                if vel_along_normal < 0:
+                    restitution = bounciness
+                    impulse_mag = -(1 + restitution) * vel_along_normal
+                    denom = (1 / self.mass) + ((r.cross(normal) ** 2) / self.inertia)
+                    if denom != 0:
+                        impulse_mag /= denom
+                        impulse = normal * impulse_mag
 
-            if corner.x > 1280:
-                depth = corner.x - 1280
-                self.pos.x -= depth
-                self.vel.x = -self.vel.x * bounciness
-                self.ang_vel *= 0.7
+                        self.vel += impulse * (1 / self.mass)
+
+                        self.ang_vel += r.cross(impulse) / self.inertia
+
+                tangent = rel_vel - normal * rel_vel.dot(normal)
+                tlen = tangent.length()
+                if tlen > 1e-6:
+                    tdir = tangent.normalized()
+                    mu = friction
+                    jt = -rel_vel.dot(tdir)
+                    jt /= denom
+                    jt = max(-impulse_mag * mu, min(impulse_mag * mu, jt))
+                    tang_imp = tdir * jt
+
+                    self.vel += tang_imp * (1 / self.mass)
+                    self.ang_vel += r.cross(tang_imp) / self.inertia
 
     def add_force(self, v: vec2):
         self.vel = self.vel + v
@@ -454,7 +467,7 @@ class Rectangle:
         if self.lock:
             return
         ang_acc = torque / self.inertia if self.inertia != 0 else 0.0
-        self.ang_vel += ang_acc
+        self.ang_vel += ang_acc*self.vel.normalized().length()*15
 
     def update(self, gravity, bounciness, air_density, drag_coefficient, friction, floor, dt, simulation_type):
         if self.lock:
@@ -462,6 +475,10 @@ class Rectangle:
 
         self.vel += vec2(0, gravity * dt * 60)
         self.pos += self.vel * dt
+
+        if self.lock_angle:
+            self.angle = 0
+            self.ang_vel = 0
 
         self.vel *= (1 - drag_coefficient * air_density * dt)
         self.ang_vel *= (1 - 0.01 * drag_coefficient * air_density)
@@ -491,7 +508,7 @@ class Rectangle:
                 torque = -r.x * self.mass * 5
                 self.add_torque(torque)
 
-                self.ang_vel *= 0.7
+                #self.ang_vel *= 0.7
 
         self.angle += self.ang_vel * dt
 
