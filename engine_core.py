@@ -35,6 +35,9 @@ class EngineCore:
         self.frame_num = 0
 
         self.cam = None
+        
+        self.mouse_pos = vec2()
+        self.keys = []
 
         self.future_positions = []
         self.predict_freq = 0.5
@@ -180,7 +183,9 @@ class EngineCore:
                 if a.check_collision(b):
                     a.resolve_overlap(b)
                     a.collision_response(b)
-                    
+
+        self.mouse_pos = vec2(pygame.mouse.get_pos()[0], pygame.mouse.get_pos()[1])
+        self.keys = pygame.key.get_pressed()
         self.basic_physics_time = time.time() - start
 
         self.render()

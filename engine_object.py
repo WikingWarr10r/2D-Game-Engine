@@ -98,12 +98,6 @@ class Object:
             self.pos.y = lower-self.radius
             self.vel.y = -self.vel.y*bounciness
             self.vel.x *= friction
-        if self.pos.x < 0 + self.radius:
-            self.pos.x = 0 + self.radius
-            self.vel.x *= -1
-        if self.pos.x > 1280 - self.radius:
-            self.pos.x = 1280 - self.radius
-            self.vel.x *= -1
 
     def add_force(self, vec):
         self.vel += vec

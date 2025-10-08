@@ -22,6 +22,7 @@ class InspectorUI:
             if script.endswith(".py"):
                 scripts.append(script[:-3])
         self.ui.add_choice(scripts, "Attached Script")
+        self.ui.set_value("Attached Script", os.listdir("Scripts/").index("none.py"))
 
     def update(self):
         if pygame.mouse.get_pressed()[0] and not self.engine.mouse_over_ui():

@@ -46,9 +46,10 @@ def static_check(path: Path) -> bool:
     return True
 
 class Script:
-    def __init__(self, file, obj):
+    def __init__(self, file, obj, engine):
         self.module_name = file[:-3]
         self.obj = obj
+        self.engine = engine
 
         self.safe = static_check(Path(f"Scripts/{file}"))
         if self.safe: 
@@ -59,19 +60,20 @@ class Script:
 
     def init(self):
         if hasattr(self.module, "init") and self.safe:
-            self.module.init(self.obj)
+            self.module.init(self.obj, self.engine)
 
     def update(self):
         if hasattr(self.module, "update") and self.safe:
-            self.module.update(self.obj)
+            self.module.update(self.obj, self.engine)
 
 class ScriptSystem:
-    def __init__(self):
+    def __init__(self, engine):
         self.modules = []
         self.scripts = os.listdir("Scripts")
+        self.engine = engine
         for script in self.scripts:
             if script.endswith(".py") and script != "__init__.py":
-                s = Script(script, None)
+                s = Script(script, None, self.engine)
                 if s.safe:
                     self.modules.append(s)
                     print(f"Imported {s.module_name}")

@@ -17,7 +17,7 @@ profiler = ProfilerUI(engine, vec2(30, 30))
 
 scene_manager = SceneManagerUI(engine, vec2(30, 615), ui)
 
-script_system = ScriptSystem()
+script_system = ScriptSystem(engine)
 script_system.init()
 inspector = InspectorUI(engine, script_system, vec2(30, 320))
 

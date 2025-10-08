@@ -9,4 +9,4 @@ def init(obj, engine):
 
 # Update function called every frame
 def update(obj, engine):
-    print(f"Hello World from {obj}")
+    pass

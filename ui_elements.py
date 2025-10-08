@@ -197,11 +197,47 @@ class UIChoice:
         rect = pygame.Rect(self.pos.x, self.pos.y, self.width, self.height)
         pygame.draw.rect(screen, (150, 30, 30), rect, border_radius=5)
 
-        text_surf = self.font.render(str(self.value), True, (255, 255, 255))
+        ellipsis = "..."
+        def fit_text(text, max_width):
+            text_surf = self.font.render(text, True, (255, 255, 255))
+            if text_surf.get_width() <= max_width:
+                return text
+            for i in range(len(text), 0, -1):
+                trimmed_text = text[:i] + ellipsis
+                text_surf = self.font.render(trimmed_text, True, (255, 255, 255))
+                if text_surf.get_width() <= max_width:
+                    return trimmed_text
+            return ellipsis
+
+        value_max_width = self.width - 10
+        text = str(self.value)
+        text_surf = self.font.render(text, True, (255, 255, 255))
+        if text_surf.get_width() > value_max_width:
+            for i in range(len(text), 0, -1):
+                trimmed_text = text[:i] + ellipsis
+                text_surf = self.font.render(trimmed_text, True, (255, 255, 255))
+                if text_surf.get_width() <= value_max_width:
+                    text = trimmed_text
+                    break
+            else:
+                text = ellipsis
+            text_surf = self.font.render(text, True, (255, 255, 255))
         screen.blit(text_surf, (self.pos.x + 5, self.pos.y + (self.height - text_surf.get_height()) / 2))
 
-        text_surf = self.font.render(self.label, True, (255, 255, 255))
-        screen.blit(text_surf, (self.pos.x + 5 + self.width, self.pos.y + (self.height - text_surf.get_height()) / 2))
+        label_max_width = 150
+        label_text = self.label
+        label_surf = self.font.render(label_text, True, (255, 255, 255))
+        if label_surf.get_width() > label_max_width:
+            for i in range(len(label_text), 0, -1):
+                trimmed_text = label_text[:i] + ellipsis
+                label_surf = self.font.render(trimmed_text, True, (255, 255, 255))
+                if label_surf.get_width() <= label_max_width:
+                    label_text = trimmed_text
+                    break
+            else:
+                label_text = ellipsis
+            label_surf = self.font.render(label_text, True, (255, 255, 255))
+        screen.blit(label_surf, (self.pos.x + 5 + self.width, self.pos.y + (self.height - label_surf.get_height()) / 2))
 
     def handle_event(self, event):
         if event.type == pygame.MOUSEWHEEL:
