@@ -82,8 +82,8 @@ class PhysicsUI:
                 self.held = False
             if pygame.mouse.get_pressed()[2]:
                 for obj in self.engine.objects:
-                    length = (mouse_pos - obj.pos).length()
-                    obj.add_force(((mouse_pos - obj.pos) / vec2(length, length)) * 50)
+                    length = (self.engine.cam.ss_to_ws_vec(mouse_pos) - obj.pos).length()
+                    obj.add_force(((self.engine.cam.ss_to_ws_vec(mouse_pos) - obj.pos) / vec2(length, length)) * 50)
 
         if self.ui.get_value("Add New Object"):
             if self.held == False:
