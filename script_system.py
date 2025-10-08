@@ -80,11 +80,13 @@ class ScriptSystem:
 
     def init(self):
         for script in self.modules:
-            script.init()
+            if not script.obj == None:
+                script.init()
 
     def update(self):
         for script in self.modules:
-            script.update()
+            if not script.obj == None:
+                script.update()
 
     def attach_to_object(self, script, obj):
         self.modules[self.scripts.index(script)].obj = obj
