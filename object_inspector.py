@@ -2,10 +2,13 @@ from ui_container import UIObject
 from engine_math import vec2
 from engine_object import Object, Rectangle
 import pygame
+import os
+from script_system import ScriptSystem
 
 class InspectorUI:
-    def __init__(self, engine, pos, obj=None):
+    def __init__(self, engine, script_system: ScriptSystem, pos, obj=None):
         self.engine = engine
+        self.script_system = script_system
         self.ui = UIObject("Inspector", pos, 300, 200, engine)
         self.obj = obj
 
@@ -14,7 +17,11 @@ class InspectorUI:
         self.ui.add_vec2(vec2(), "Object Position")
         self.ui.add_label("Velocity:")
         self.ui.add_vec2(vec2(), "Object Velocity")
-
+        scripts = []
+        for script in os.listdir("Scripts/"):
+            if script.endswith(".py"):
+                scripts.append(script[:-3])
+        self.ui.add_choice(scripts, "Attached Script")
 
     def update(self):
         if pygame.mouse.get_pressed()[0] and not self.engine.mouse_over_ui():
@@ -32,6 +39,11 @@ class InspectorUI:
             self.ui.set_value("obj_type", f"Object Type: {obj_type}")
             self.ui.set_value("Object Position", self.obj.pos)
             self.ui.set_value("Object Velocity", self.obj.vel)
+
+            current_script = self.ui.get_value('Attached Script')
+            self.script_system.detach_all_scripts()          
+            self.script_system.attach_to_object(f"{current_script}.py", self.obj)
+
         else:
             self.ui.set_value("obj_type", f"None Selected")
             self.ui.set_value("Object Position", vec2(0,0))

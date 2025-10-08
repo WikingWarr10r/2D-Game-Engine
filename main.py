@@ -17,10 +17,9 @@ profiler = ProfilerUI(engine, vec2(30, 30))
 
 scene_manager = SceneManagerUI(engine, vec2(30, 615), ui)
 
-inspector = InspectorUI(engine, vec2(30, 320))
-
 script_system = ScriptSystem()
 script_system.init()
+inspector = InspectorUI(engine, script_system, vec2(30, 320))
 
 while engine.looping:
     start = time.time()

@@ -3,7 +3,7 @@ import ast
 from pathlib import Path
 
 def static_check(path: Path) -> bool:    
-    BANNED_MODULES = {"subprocess", "os", "socket", "shutil", "requests", "ctypes", "fcntl", "http", "ftplib", "urllib"}
+    BANNED_MODULES = {"subprocess", "socket", "shutil", "requests", "ctypes", "fcntl", "http", "ftplib", "urllib"}
 
     BANNED_FUNCTIONS = {"system", "popen", "remove", "rmdir", "unlink", "exec", "eval", "compile", "open", "__import__", "globals", "locals", "vars", "input"}
 

@@ -9,4 +9,5 @@ def init(obj):
 
 # Update function called every frame
 def update(obj):
-    print(f"Hello World from {obj}")
+    if not obj == None:
+        print(obj.pos)
