@@ -65,6 +65,12 @@ class UIObject:
         if label in self.lookup:
             self.lookup[label].set_value(val)
 
+    def delete_element(self, label):
+        if label in self.lookup:
+            elem = self.lookup.pop(label)
+            if elem in self.elements:
+                self.elements.remove(elem)
+
     def handle_event(self, event):
         if event.type == pygame.MOUSEBUTTONDOWN and event.button == 1:
             mouse_pos = vec2(*event.pos)

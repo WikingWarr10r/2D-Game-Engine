@@ -12,6 +12,8 @@ class InspectorUI:
         self.ui = UIObject("Inspector", pos, 300, 200, engine)
         self.obj = obj
 
+        self.attached_scripts = []
+
         self.ui.add_label("Object Type: ", "obj_type")
         self.ui.add_label("Position:")
         self.ui.add_vec2(vec2(), "Object Position")
@@ -24,9 +26,10 @@ class InspectorUI:
         
         self.ui.add_spacer()
         self.ui.add_choice(scripts, "Script")
-        self.ui.set_value("Script", os.listdir("Scripts/").index("none.py"))
         self.ui.add_button(False, "Add Script", True)
         self.ui.add_button(False, "Remove All Scripts", True)
+        self.ui.add_spacer()
+        self.ui.add_label("Attached Scripts:")
 
     def update(self):
         if pygame.mouse.get_pressed()[0] and not self.engine.mouse_over_ui():
@@ -49,7 +52,18 @@ class InspectorUI:
             if self.ui.get_value("Add Script"):
                 self.script_system.attach_to_object(f"{current_script}.py", self.obj)
             if self.ui.get_value("Remove All Scripts"):
-                self.script_system.detach_all_scripts()
+                self.script_system.detach_all_scripts_from_obj(self.obj)
+
+            for script in self.attached_scripts:
+                self.ui.delete_element(script)
+
+            self.attached_scripts = []
+            for script in self.script_system.modules:
+                if self.obj in script.objs:
+                    self.attached_scripts.append(script.module_name)
+
+            for script in self.attached_scripts:
+                self.ui.add_label(script, id=script)
 
         else:
             self.ui.set_value("obj_type", f"None Selected")

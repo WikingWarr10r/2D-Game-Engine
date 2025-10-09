@@ -46,9 +46,9 @@ def static_check(path: Path) -> bool:
     return True
 
 class Script:
-    def __init__(self, file, obj, engine):
+    def __init__(self, file, objs, engine):
         self.module_name = file[:-3]
-        self.obj = obj
+        self.objs = objs
         self.engine = engine
 
         self.safe = static_check(Path(f"Scripts/{file}"))
@@ -58,13 +58,20 @@ class Script:
         else:
             self.module = None
 
+    def check_for_duplicates(self):
+        self.objs = list(set(self.objs))
+
     def init(self):
-        if hasattr(self.module, "init") and self.safe:
-            self.module.init(self.obj, self.engine)
+        if len(self.objs) > 0:
+            for obj in self.objs:
+                if hasattr(self.module, "init") and self.safe:
+                    self.module.init(obj, self.engine)
 
     def update(self):
-        if hasattr(self.module, "update") and self.safe:
-            self.module.update(self.obj, self.engine)
+        if len(self.objs) > 0:
+            for obj in self.objs:
+                if hasattr(self.module, "update") and self.safe:
+                    self.module.update(obj, self.engine)
 
 class ScriptSystem:
     def __init__(self, engine):
@@ -73,7 +80,7 @@ class ScriptSystem:
         self.engine = engine
         for script in self.scripts:
             if script.endswith(".py") and script != "__init__.py":
-                s = Script(script, None, self.engine)
+                s = Script(script, [], self.engine)
                 if s.safe:
                     self.modules.append(s)
                     print(f"Imported {s.module_name}")
@@ -82,13 +89,12 @@ class ScriptSystem:
 
     def init(self):
         for script in self.modules:
-            if not script.obj == None:
-                script.init()
+            script.init()
 
     def update(self):
         for script in self.modules:
-            if not script.obj == None:
-                script.update()
+            script.update()
+            script.check_for_duplicates()
 
     def attach_to_object(self, script, obj):
         self.modules[self.scripts.index(script)].objs.append(obj)
@@ -96,3 +102,8 @@ class ScriptSystem:
     def detach_all_scripts(self):
         for script in self.modules:
             script.objs = []
+
+    def detach_all_scripts_from_obj(self, obj):
+        for script in self.modules:
+            if obj in script.objs:
+                script.objs.remove(obj)

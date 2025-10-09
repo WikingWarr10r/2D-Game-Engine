@@ -13,13 +13,13 @@ cam = Camera(vec2(0,0), 1)
 engine.add_camera(cam)
 
 ui = PhysicsUI(engine, vec2(950, 30))
-profiler = ProfilerUI(engine, vec2(30, 30))
+#profiler = ProfilerUI(engine, vec2(30, 30))
 
 scene_manager = SceneManagerUI(engine, vec2(30, 615), ui)
 
 script_system = ScriptSystem(engine)
 script_system.init()
-inspector = InspectorUI(engine, script_system, vec2(30, 320))
+inspector = InspectorUI(engine, script_system, vec2(30, 30))
 
 while engine.looping:
     start = time.time()
@@ -41,4 +41,4 @@ while engine.looping:
 
     # Extra UI
     ui.update_stats(start)
-    profiler.update_profiler()
+    #profiler.update_profiler()
