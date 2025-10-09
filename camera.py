@@ -21,6 +21,9 @@ class Camera:
         if isinstance(vector, tuple):
             return ((vector[0] + self.pos.x)/self.zoom, (vector[1] + self.pos.y)/self.zoom)
         
+    def centre(self, pos):
+        self.pos = vec2(pos.x - 1280/2, pos.y - 720/2)
+
     def update(self):
         keys = pygame.key.get_pressed()
         if keys[pygame.K_LEFT]:

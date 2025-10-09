@@ -21,6 +21,8 @@ script_system = ScriptSystem(engine)
 script_system.init()
 inspector = InspectorUI(engine, script_system, vec2(30, 30))
 
+engine.add_rect(vec2(50, 50), vec2(), 30, 70)
+
 while engine.looping:
     start = time.time()
 
@@ -34,7 +36,7 @@ while engine.looping:
     script_system.update()
 
     # Camera
-    cam.update()
+    #cam.update()
 
     # Engine Main Loop
     engine.main_loop()

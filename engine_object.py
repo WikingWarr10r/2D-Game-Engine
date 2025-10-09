@@ -466,16 +466,18 @@ class Rectangle:
         if self.lock:
             return
 
-        self.vel += vec2(0, gravity * dt * 60)
+        if simulation_type == "Basic":
+            self.vel += vec2(0, gravity * dt * 60)
         self.pos += self.vel * dt
 
         if self.lock_angle:
             self.angle = 0
             self.ang_vel = 0
 
-        self.vel *= (1 - drag_coefficient * air_density * dt)
-        self.vel *= (1 - drag_coefficient * air_density * dt)
-        self.ang_vel *= (1 - 0.01 * drag_coefficient * air_density)
+        if simulation_type == "Basic":
+            self.vel *= (1 - drag_coefficient * air_density * dt)
+            self.vel *= (1 - drag_coefficient * air_density * dt)
+            self.ang_vel *= (1 - 0.01 * drag_coefficient * air_density)
 
         half_w = self.width * 0.5
         half_h = self.height * 0.5
@@ -491,18 +493,19 @@ class Rectangle:
                                         c.x*sin_a + c.y*cos_a)
                         for c in corners]
 
-        for corner in world_corners:
-            if corner.y > floor:
-                depth = corner.y - floor
-                self.pos.y -= depth
-                self.vel.y = -self.vel.y * bounciness
-                self.vel.x *= friction
+        if simulation_type == "Basic":
+            for corner in world_corners:
+                if corner.y > floor:
+                    depth = corner.y - floor
+                    self.pos.y -= depth
+                    self.vel.y = -self.vel.y * bounciness
+                    self.vel.x *= friction
 
-                r = corner - self.pos
-                torque = -r.x * self.mass * 5
-                self.add_torque(torque)
+                    r = corner - self.pos
+                    torque = -r.x * self.mass * 5
+                    self.add_torque(torque)
 
-                self.ang_vel *= 0.9
+                    self.ang_vel *= 0.9
 
         self.angle += self.ang_vel * dt
 
