@@ -193,8 +193,8 @@ class EngineCore:
         pygame.display.flip()
         self.clock.tick(60)
     
-    def add_circle(self, pos: vec2, vel: vec2, radius, lock = False):
-        self.objects.append(Object(pos, vel, radius, self.cam, lock))
+    def add_circle(self, pos: vec2, vel: vec2, radius, lock = False, collisions=True):
+        self.objects.append(Object(pos, vel, radius, self.cam, lock, collisions))
 
     def add_rect(self, pos: vec2, vel: vec2, width, height, lock = False, lock_angle = False):
         self.objects.append(Rectangle(pos, vel, width, height, self.cam, lock, lock_angle))

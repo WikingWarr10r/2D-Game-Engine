@@ -3,7 +3,7 @@ from engine_math import *
 from camera import Camera
 
 class Object:
-    def __init__(self, pos: vec2, vel: vec2, radius, cam: Camera, lock = False):
+    def __init__(self, pos: vec2, vel: vec2, radius, cam: Camera, lock = False, collisions = True):
         self.pos = pos
         self.initial_pos = pos
         self.vel = vel
@@ -18,6 +18,8 @@ class Object:
         
         self.radius = radius
         self.mass = (pi * radius * radius) * self.density
+
+        self.collisions = collisions
 
     def store(self):
         return f"Circle {self.pos.x},{self.pos.y} {self.initial_pos.x},{self.initial_pos.y} {self.vel.x},{self.vel.y} {self.lock} {self.radius} {self.mass}"
@@ -41,57 +43,59 @@ class Object:
         return distance < (self.radius + other.radius)
     
     def resolve_overlap(self, other):
-        delta = vec2(other.pos.x - self.pos.x, other.pos.y - self.pos.y)
-        dist = (delta.x**2 + delta.y**2) ** 0.5
-        if dist == 0:
-            dist = 0.01
+        if self.collisions:
+            delta = vec2(other.pos.x - self.pos.x, other.pos.y - self.pos.y)
+            dist = (delta.x**2 + delta.y**2) ** 0.5
+            if dist == 0:
+                dist = 0.01
 
-        overlap = (self.radius + other.radius) - dist
-        if overlap <= 0:
-            return
+            overlap = (self.radius + other.radius) - dist
+            if overlap <= 0:
+                return
 
-        normal = vec2(delta.x / dist, delta.y / dist)
-        if self.lock and other.lock:
-            return 
-        elif self.lock:
-            other.pos.x += normal.x * overlap
-            other.pos.y += normal.y * overlap
-        elif other.lock:
-            self.pos.x -= normal.x * overlap
-            self.pos.y -= normal.y * overlap
-        else:
-            self.pos.x -= normal.x * overlap / 2
-            self.pos.y -= normal.y * overlap / 2
-            other.pos.x += normal.x * overlap / 2
-            other.pos.y += normal.y * overlap / 2
+            normal = vec2(delta.x / dist, delta.y / dist)
+            if self.lock and other.lock:
+                return 
+            elif self.lock:
+                other.pos.x += normal.x * overlap
+                other.pos.y += normal.y * overlap
+            elif other.lock:
+                self.pos.x -= normal.x * overlap
+                self.pos.y -= normal.y * overlap
+            else:
+                self.pos.x -= normal.x * overlap / 2
+                self.pos.y -= normal.y * overlap / 2
+                other.pos.x += normal.x * overlap / 2
+                other.pos.y += normal.y * overlap / 2
     
     def collision_response(self, other):
-        if self.lock and other.lock:
-            return 
+        if self.collisions:
+            if self.lock and other.lock:
+                return 
 
-        delta = other.pos - self.pos
-        dist = (delta.x ** 2 + delta.y ** 2) ** 0.5
-        if dist == 0:
-            dist = 0.01
+            delta = other.pos - self.pos
+            dist = (delta.x ** 2 + delta.y ** 2) ** 0.5
+            if dist == 0:
+                dist = 0.01
 
-        normal = delta / vec2(dist, dist)
-        
-        relative_velocity = other.vel - self.vel
-        vel_along_normal = relative_velocity.x * normal.x + relative_velocity.y * normal.y
-        normal = delta / vec2(dist, dist)
-        if vel_along_normal > 0:
-            return
+            normal = delta / vec2(dist, dist)
+            
+            relative_velocity = other.vel - self.vel
+            vel_along_normal = relative_velocity.x * normal.x + relative_velocity.y * normal.y
+            normal = delta / vec2(dist, dist)
+            if vel_along_normal > 0:
+                return
 
-        restitution = 0.7
-        impulse_scalar = -(1 + restitution) * vel_along_normal
-        impulse_scalar /= (0 if self.lock else 1 / self.mass) + (0 if other.lock else 1 / other.mass)
-        impulse = normal * impulse_scalar
-        impulse = normal * impulse_scalar
+            restitution = 0.7
+            impulse_scalar = -(1 + restitution) * vel_along_normal
+            impulse_scalar /= (0 if self.lock else 1 / self.mass) + (0 if other.lock else 1 / other.mass)
+            impulse = normal * impulse_scalar
+            impulse = normal * impulse_scalar
 
-        if not self.lock:
-            self.vel = self.vel - impulse * (1 / self.mass)
-        if not other.lock:
-            other.vel = other.vel + impulse * (1 / other.mass)
+            if not self.lock:
+                self.vel = self.vel - impulse * (1 / self.mass)
+            if not other.lock:
+                other.vel = other.vel + impulse * (1 / other.mass)
 
     def collide(self, lower, bounciness, friction):
         if self.pos.y > lower-self.radius:
@@ -115,7 +119,8 @@ class Object:
             air_res = vec2(-0.5, -0.5) * vec2(air_density, air_density) * self.vel * vec2(drag_coefficient, drag_coefficient) * (2*pi*self.radius/2)
             self.add_force(air_res)
 
-            self.collide(floor, bounciness, friction)
+            if self.collisions:
+                self.collide(floor, bounciness, friction)
         
         elif simulation_type == "Newtonian Gravity":
             self.pos = self.pos + (self.vel * vec2(dt, dt))

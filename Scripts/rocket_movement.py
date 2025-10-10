@@ -5,16 +5,24 @@ sys.path.insert(0, parent_dir)
 
 import pygame
 from engine_math import vec2, math
+from particle_system import ParticleSystem
+
+ps = None
 
 # Init function called once at the beginning
 def init(obj, engine):
-    pass
+    global ps
+    ps = ParticleSystem(engine, vec2(), vec2())
 
 # Update function called every frame
 def update(obj, engine):
+    global ps
+    ps.pos = obj.pos
+    ps.vel = vec2(-1, -1) * obj.vel
     force_magnitude = 0
     if engine.keys[pygame.K_w]:
         force_magnitude = 5
+        ps.spawn_particles()
     if engine.keys[pygame.K_d]:
         obj.ang_vel += 0.01
     if engine.keys[pygame.K_a]:
