@@ -180,7 +180,7 @@ class EngineCore:
             for j in range(i+1, len(self.objects)):
                 a = self.objects[i]
                 b = self.objects[j]
-                if a.check_collision(b):
+                if a.check_collision(b) and a.collisions and b.collisions:
                     a.resolve_overlap(b)
                     a.collision_response(b)
 

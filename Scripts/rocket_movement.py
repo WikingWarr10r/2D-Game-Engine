@@ -7,16 +7,16 @@ import pygame
 from engine_math import vec2, math
 from particle_system import ParticleSystem
 
-ps = None
+ps = ParticleSystem(None, vec2(), vec2())
 
 # Init function called once at the beginning
 def init(obj, engine):
-    global ps
-    ps = ParticleSystem(engine, vec2(), vec2())
+    pass
 
 # Update function called every frame
 def update(obj, engine):
     global ps
+    ps.engine = engine
     ps.pos = obj.pos
     ps.vel = vec2(-1, -1) * obj.vel
     force_magnitude = 0
