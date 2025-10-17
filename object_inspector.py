@@ -19,6 +19,7 @@ class InspectorUI:
         self.ui.add_vec2(vec2(), "Object Position")
         self.ui.add_label("Velocity:")
         self.ui.add_vec2(vec2(), "Object Velocity")
+        self.ui.add_button(False, "Camera to Object", True)
         scripts = []
         for script in os.listdir("Scripts/"):
             if script.endswith(".py"):
@@ -47,6 +48,9 @@ class InspectorUI:
             self.ui.set_value("obj_type", f"Object Type: {obj_type}")
             self.ui.set_value("Object Position", self.obj.pos)
             self.ui.set_value("Object Velocity", self.obj.vel)
+
+            if self.ui.get_value("Camera to Object"):
+                self.engine.cam.centre(self.obj.pos)
 
             current_script = self.ui.get_value("Script")
             if self.ui.get_value("Add Script"):
