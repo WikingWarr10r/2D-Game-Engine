@@ -485,9 +485,8 @@ class Rectangle:
             self.ang_vel = 0
 
         if simulation_type == "Basic":
-            self.vel *= (1 - drag_coefficient * air_density * dt)
-            self.vel *= (1 - drag_coefficient * air_density * dt)
-            self.ang_vel *= (1 - 0.01 * drag_coefficient * air_density)
+            self.vel *= math.exp(-drag_coefficient * air_density * dt)
+            self.ang_vel *= math.exp(-(1e-3) * air_density * dt)
 
         half_w = self.width * 0.5
         half_h = self.height * 0.5
@@ -512,7 +511,7 @@ class Rectangle:
                     self.vel.x *= friction
 
                     r = corner - self.pos
-                    torque = -r.x * self.mass * 5
+                    torque = -r.x * self.mass * 5 * self.vel.normalized().length()
                     self.add_torque(torque)
 
                     self.ang_vel *= 0.9
